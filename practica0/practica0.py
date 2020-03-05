@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+Antonio David Villegas Yeguas - 3o CSI - Curso 19/20
+
+"""
+
 # importamos numpy entero
 import numpy as np
 
@@ -228,7 +234,7 @@ plt.plot(valores_2pi[:], sin_cos_valores[:], "--r", label="sin(x) + cos(x)")
 
 
 plt.xlabel("Eje X: Desde 0 hasta 2*pi")
-plt.ylabel("Eje Y: Valor de X en la función")
+plt.ylabel("Eje Y: Valor de f(X) en cada función")
 plt.title("Parte 3: Sin(x), cos(x) y sin(x) + cos(x)")
 
 # Añadimos la legenda, que deenderá del parametro 'label' al dibujar, también le decimos
