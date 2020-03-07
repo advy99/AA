@@ -28,21 +28,25 @@ def dEv(u,v):
 def gradE(u,v):
     return np.array([dEu(u,v), dEv(u,v)])
 
-def gradient_descent(funcion, w_0, tasa_aprendizaje, maxIter, maxError):
+def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxError):
     #
     # gradiente descendente
     #
 	iterations = 0
-	error = np.float64(0)
+	error = np.float64(1)
 
+	w_j = w_0
+
+	# Condición de parada, llegamos al límite de iteraciones
+	# o el error es menor que el error máximo permitido
 	while iterations < maxIter and error > maxError:
 
-
+		w_j = w_j - tasa_aprendizaje * gradFuncion()
 
 		iterations = iterations + 1
 
 
-    return w, iterations
+	return w, iterations
 
 
 eta = 0.01
