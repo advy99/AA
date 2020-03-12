@@ -18,22 +18,41 @@ def E(u,v):
 
 #Derivada parcial de E con respecto a u
 def dEu(u,v):
-    return E(u,v).diff(u)#Derivada parcial de E con respecto a u
+    return np.float64( 2 * (u*np.e**(v) - 2 * v * np.e**(-u) ) * (np.e**(v) + 2 * v * np.e**(-u) ) )#Derivada parcial de E con respecto a u
 
 #Derivada parcial de E con respecto a v
 def dEv(u,v):
-    return E(u,v).diff(v)#Derivada parcial de E con respecto a v
+    return np.float64( 2 * (u*np.e**(v) - 2 * v * np.e**(-u) ) * (u * np.e**(v) - 2 * np.e**(-u) ) )#Derivada parcial de E con respecto a v
 
 #Gradiente de E
 def gradE(u,v):
     return np.array([dEu(u,v), dEv(u,v)])
+
+
+
+# Función dada en el ejercicio 1.3.
+def F(x,y):
+	return np.float64( (x - 2)**2 + 2 * (y + 2)**2 + 2 * np.sin(2 * np.pi * x) * np.sin(2 * np.pi * y)  ) # function
+
+#Derivada parcial de F con respecto a x
+def dFx(x, y):
+    return np.float64( 2*x - 4 + 4*np.pi*np.cos(2*np.pi*x)*np.sin(2*np.pi*y) )#Derivada parcial de E con respecto a u
+
+#Derivada parcial de F con respecto a y
+def dFy(x, y):
+    return np.float64( 4*y + 8 + 4*np.pi*np.sin(2*np.pi*x)*np.cos(2*np.pi*y) )#Derivada parcial de E con respecto a v
+
+#Gradiente de E
+def gradF(x, y):
+    return np.array([dFx(x, y), dFy(x, y)])
+	
 
 def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxError):
     #
     # gradiente descendente
     #
 	iterations = 0
-	error = np.float64(1)
+	error = funcion(w_0[0], w_0[1])
 
 	w_j = w_0
 
@@ -41,10 +60,13 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 	# o el error es menor que el error máximo permitido
 	while iterations < maxIter and error > maxError:
 
-		w_j = w_j - tasa_aprendizaje * gradFuncion()
+		w_j = w_j - tasa_aprendizaje * gradFuncion(w_j[0], w_j[1])
+		error = funcion(w_j[0], w_j[1])
 
 		iterations = iterations + 1
 
+
+	w = w_j
 
 	return w, iterations
 
@@ -53,11 +75,12 @@ eta = 0.01
 maxIter = 10000000000
 error2get = 1e-14
 initial_point = np.array([1.0,1.0])
-w, it = gradient_descent(E, initial_point, eta, maxIter)
+w, it = gradient_descent(E, gradE, initial_point, eta, maxIter, error2get)
 
 
 print ('Numero de iteraciones: ', it)
 print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
+print ('Valor de la función en dichas coordenadas', E(w[0], w[1]))
 
 
 # DISPLAY FIGURE
@@ -80,7 +103,7 @@ ax.set_zlabel('E(u,v)')
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-#Seguir haciendo el ejercicio...
+plt.show()
 
 
 
@@ -88,6 +111,56 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
+
+"""
+Apartado 1.3: cambiamos la función
+
+"""
+
+
+
+
+
+eta = 0.01
+maxIter = 50
+error2get = 1e-14
+initial_point = np.array([1.0,-1.0])
+w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
+
+
+print ('Numero de iteraciones: ', it)
+print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
+print ('Valor de la función en dichas coordenadas', F(w[0], w[1]))
+
+
+# DISPLAY FIGURE
+from mpl_toolkits.mplot3d import Axes3D
+x = np.linspace(-30, 30, 50)
+y = np.linspace(-30, 30, 50)
+X, Y = np.meshgrid(x, y)
+Z = F(X, Y)
+fig = plt.figure()
+ax = Axes3D(fig)
+surf = ax.plot_surface(X, Y, Z, edgecolor='none', rstride=1,
+                        cstride=1, cmap='jet')
+min_point = np.array([w[0],w[1]])
+min_point_ = min_point[:, np.newaxis]
+ax.plot(min_point_[0], min_point_[1], F(min_point_[0], min_point_[1]), 'r*', markersize=10)
+ax.set(title='Ejercicio 1.3. Función sobre la que se calcula el descenso de gradiente')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('F(x,y)')
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+plt.show()
+
+
+
+
+
+
+"""
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -155,3 +228,4 @@ def simula_unif(N, d, size):
 	return np.random.uniform(-size,size,(N,d))
 
 #Seguir haciendo el ejercicio...
+"""
