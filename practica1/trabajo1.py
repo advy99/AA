@@ -45,7 +45,7 @@ def dFy(x, y):
 #Gradiente de E
 def gradF(x, y):
     return np.array([dFx(x, y), dFy(x, y)])
-	
+
 
 def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxError):
     #
@@ -71,7 +71,7 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 	return w, iterations
 
 
-eta = 0.01
+eta = 0.1
 maxIter = 10000000000
 error2get = 1e-14
 initial_point = np.array([1.0,1.0])
@@ -123,7 +123,7 @@ Apartado 1.3: cambiamos la función
 
 eta = 0.01
 maxIter = 50
-error2get = 1e-14
+error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
 w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
 
