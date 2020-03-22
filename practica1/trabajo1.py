@@ -56,29 +56,36 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 
 	w_j = w_0
 
+	valores = np.array(funcion(w_j[0], w_j[1]))
+
 	# Condición de parada, llegamos al límite de iteraciones
 	# o el error es menor que el error máximo permitido
 	while iterations < maxIter and error > maxError:
 
 		w_j = w_j - tasa_aprendizaje * gradFuncion(w_j[0], w_j[1])
 		error = funcion(w_j[0], w_j[1])
-
+		valores = np.append(valores, funcion(w_j[0], w_j[1]))
+		print('Valor de la función tras ', iterations, ' iteraciones: ', error )
 		iterations = iterations + 1
 
 
 	w = w_j
 
-	return w, iterations
+	return w, iterations, valores
 
 
 eta = 0.1
 maxIter = 10000000000
 error2get = 1e-14
 initial_point = np.array([1.0,1.0])
-w, it = gradient_descent(E, gradE, initial_point, eta, maxIter, error2get)
+w, it, valores_descenso = gradient_descent(E, gradE, initial_point, eta, maxIter, error2get)
 
 
+print ('Tasa de aprendizaje: ', eta)
+print ('Error mínimo permitido: ', error2get)
+print ('Numero de iteraciones maximas: ', maxIter)
 print ('Numero de iteraciones: ', it)
+print ('Coordenadas iniciales: (', initial_point[0], ', ', initial_point[1],')')
 print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
 print ('Valor de la función en dichas coordenadas', E(w[0], w[1]))
 
@@ -119,113 +126,164 @@ Apartado 1.3: cambiamos la función
 
 
 
+def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
+	w, it, valores_descenso = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
+
+
+	print ('Tasa de aprendizaje: ', eta)
+	print ('Error mínimo permitido: ', error2get)
+	print ('Numero de iteraciones maximas: ', maxIter)
+	print ('Numero de iteraciones: ', it)
+	print ('Coordenadas iniciales: (', initial_point[0], ', ', initial_point[1],')')
+	print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
+	print ('Valor de la función en dichas coordenadas', F(w[0], w[1]))
+
+
+	# DISPLAY FIGURE
+	from mpl_toolkits.mplot3d import Axes3D
+	x = np.linspace(-30, 30, 50)
+	y = np.linspace(-30, 30, 50)
+	X, Y = np.meshgrid(x, y)
+	Z = F(X, Y)
+	fig = plt.figure()
+	ax = Axes3D(fig)
+	surf = ax.plot_surface(X, Y, Z, edgecolor='none', rstride=1,
+	                        cstride=1, cmap='jet')
+	min_point = np.array([w[0],w[1]])
+	min_point_ = min_point[:, np.newaxis]
+	ax.plot(min_point_[0], min_point_[1], F(min_point_[0], min_point_[1]), 'r*', markersize=10)
+	ax.set(title='Ejercicio 1.3. Descenso de gradiente sobre F(x,y)\n con punto inicial {}, {}, tasa de aprendizaje {} y un maximo de iteraciones de {}'.format(initial_point[0], initial_point[1], eta, maxIter))
+	ax.set_xlabel('x')
+	ax.set_ylabel('y')
+	ax.set_zlabel('F(x,y)')
+
+	input("\n--- Pulsar tecla para continuar ---\n")
+
+	plt.show()
+
+	plt.clf()
+
+	plt.title('Ejercicio 1.3. Descenso de gradiente sobre F(x,y)\n con punto inicial {}, {}, tasa de aprendizaje {} y un maximo de iteraciones de {}'.format(initial_point[0], initial_point[1], eta, maxIter))
+	plt.xlabel('Iteraciones')
+	plt.ylabel('Valor de F(x,y)')
+	plt.scatter(range(valores_descenso.size), valores_descenso[:])
+	plt.plot(range(valores_descenso.size), valores_descenso[:])
+
+	plt.show()
+
+
+	input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
 
 
 eta = 0.01
 maxIter = 50
+
+# en este caso no tenemos el error como minimo, luego lo establecemos a
+# -infinito para que no influya en la ejecución, solo tenga en cuenta
+# las iteraciones
 error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
-w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
 
-
-print ('Numero de iteraciones: ', it)
-print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
-print ('Valor de la función en dichas coordenadas', F(w[0], w[1]))
-
-
-# DISPLAY FIGURE
-from mpl_toolkits.mplot3d import Axes3D
-x = np.linspace(-30, 30, 50)
-y = np.linspace(-30, 30, 50)
-X, Y = np.meshgrid(x, y)
-Z = F(X, Y)
-fig = plt.figure()
-ax = Axes3D(fig)
-surf = ax.plot_surface(X, Y, Z, edgecolor='none', rstride=1,
-                        cstride=1, cmap='jet')
-min_point = np.array([w[0],w[1]])
-min_point_ = min_point[:, np.newaxis]
-ax.plot(min_point_[0], min_point_[1], F(min_point_[0], min_point_[1]), 'r*', markersize=10)
-ax.set(title='Ejercicio 1.3. Función sobre la que se calcula el descenso de gradiente')
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_zlabel('F(x,y)')
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-plt.show()
-
+## llamamos a la función que nos ejecutará y mostrará las gráficas de F
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
 
 
 
 
 """
-###############################################################################
-###############################################################################
-###############################################################################
-###############################################################################
-print('EJERCICIO SOBRE REGRESION LINEAL\n')
-print('Ejercicio 1\n')
-
-label5 = 1
-label1 = -1
-
-# Funcion para leer los datos
-def readData(file_x, file_y):
-	# Leemos los ficheros
-	datax = np.load(file_x)
-	datay = np.load(file_y)
-	y = []
-	x = []
-	# Solo guardamos los datos cuya clase sea la 1 o la 5
-	for i in range(0,datay.size):
-		if datay[i] == 5 or datay[i] == 1:
-			if datay[i] == 5:
-				y.append(label5)
-			else:
-				y.append(label1)
-			x.append(np.array([1, datax[i][0], datax[i][1]]))
-
-	x = np.array(x, np.float64)
-	y = np.array(y, np.float64)
-
-	return x, y
-
-# Funcion para calcular el error
-def Err(x,y,w):
-    return
-
-# Gradiente Descendente Estocastico
-def sgd(?):
-    #
-    return w
-
-# Pseudoinversa
-def pseudoinverse(?):
-    #
-    return w
+ con tasa de aprendizaje a 0.1 en lugar de 0.01
+"""
 
 
-# Lectura de los datos de entrenamiento
-x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
-# Lectura de los datos para el test
-x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
+eta = 0.1
+maxIter = 50
+
+# en este caso no tenemos el error como minimo, luego lo establecemos a
+# -infinito para que no influya en la ejecución, solo tenga en cuenta
+# las iteraciones
+error2get = -np.Infinity
+initial_point = np.array([1.0,-1.0])
+#w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
+
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
 
-w = sgd(?)
-print ('Bondad del resultado para grad. descendente estocastico:\n')
-print ("Ein: ", Err(x,y,w))
-print ("Eout: ", Err(x_test, y_test, w))
 
-input("\n--- Pulsar tecla para continuar ---\n")
+"""
+ con los distintos puntos dados
+"""
 
-#Seguir haciendo el ejercicio...
 
-print('Ejercicio 2\n')
-# Simula datos en un cuadrado [-size,size]x[-size,size]
-def simula_unif(N, d, size):
-	return np.random.uniform(-size,size,(N,d))
+eta = 0.01
+maxIter = 50
 
-#Seguir haciendo el ejercicio...
+# en este caso no tenemos el error como minimo, luego lo establecemos a
+# -infinito para que no influya en la ejecución, solo tenga en cuenta
+# las iteraciones
+error2get = -np.Infinity
+initial_point = np.array([2.1,-2.1])
+
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+# con tasa de aprendizaje 0.1
+eta = 0.1
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+
+
+
+
+eta = 0.01
+maxIter = 50
+
+# en este caso no tenemos el error como minimo, luego lo establecemos a
+# -infinito para que no influya en la ejecución, solo tenga en cuenta
+# las iteraciones
+error2get = -np.Infinity
+initial_point = np.array([3.0,-3.0])
+
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+# con tasa de aprendizaje 0.1
+eta = 0.1
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+
+
+
+
+
+
+
+eta = 0.1
+maxIter = 50
+
+# en este caso no tenemos el error como minimo, luego lo establecemos a
+# -infinito para que no influya en la ejecución, solo tenga en cuenta
+# las iteraciones
+error2get = -np.Infinity
+initial_point = np.array([1.5,1.5])
+
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+# con tasa de aprendizaje 0.1
+eta = 0.1
+mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+
+
+
+
+"""
+
+Tabla con resultados -> en el PDF de documentación
+
+Ejercicio 1.4 -> en el PDF de documentación
+
 """
