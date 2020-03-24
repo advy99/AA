@@ -118,12 +118,107 @@ x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
 x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
 
-w, iteraciones = sgd(x, y, 0.1, 64, 100)
-print ('Bondad del resultado para grad. descendente estocastico:\n')
+eta = 0.1
+tam_batch = 64
+iteraciones = 100
+
+w, iteraciones = sgd(x, y, eta, tam_batch, iteraciones)
+print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
 print ("Ein: ", Err(x,y,w))
 print ("Eout: ", Err(x_test, y_test, w))
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+num5 = 1
+num1 = -1
+
+etiquetas = (num1, num5)
+colores = {num1: 'blue', num5: 'red'}
+valores = {num1: 1, num5: 5}
+
+plt.clf()
+
+for etiqueta in etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(y == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
+
+# pendiente de la recta Ax +By + C = -A/B
+pendiente = -w[0]/w[1]
+print('Pendiente: ',pendiente)
+
+ordenada_origen = -w[2]/w[1]
+print('Ordenada en el origen: ',ordenada_origen)
+
+otro_punto = ordenada_origen + 1
+
+minimo = x[:,1].min(axis=0)
+maximo = x[:,1].max(axis=0)
+
+# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
+plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
+
+plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+plt.xlabel('Intensidad promedio')
+plt.ylabel('Simetria')
+plt.legend()
+plt.show()
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
+
+
+
+eta = 0.01
+
+w, iteraciones = sgd(x, y, eta, tam_batch, iteraciones)
+
+print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+print ("Ein: ", Err(x,y,w))
+print ("Eout: ", Err(x_test, y_test, w))
+
+
+plt.clf()
+
+for etiqueta in etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(y == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
+
+
+# pendiente de la recta Ax +By + C = -A/B
+pendiente = -w[0]/w[1]
+print('Pendiente: ',pendiente)
+
+ordenada_origen = -w[2]/w[1]
+print('Ordenada en el origen: ',ordenada_origen)
+
+otro_punto = ordenada_origen + 1
+
+minimo = x[:,1].min(axis=0)
+maximo = x[:,1].max(axis=0)
+
+# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
+plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
+
+
+plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+plt.xlabel('Intensidad promedio')
+plt.ylabel('Simetria')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
 
 #Seguir haciendo el ejercicio...
 
@@ -133,6 +228,45 @@ print ("Ein: ", Err(x,y,w))
 print ("Eout: ", Err(x_test, y_test, w))
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+plt.clf()
+
+for etiqueta in etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(y == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
+
+
+# pendiente de la recta Ax +By + C = -A/B
+pendiente = -w[0]/w[1]
+print('Pendiente: ',pendiente)
+
+ordenada_origen = -w[2]/w[1]
+print('Ordenada en el origen: ',ordenada_origen)
+
+otro_punto = ordenada_origen + 1
+
+minimo = x[:,1].min(axis=0)
+maximo = x[:,1].max(axis=0)
+
+# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
+plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
+
+
+plt.title('Bondad del resultado usando la pseudoinversa\n')
+plt.xlabel('Intensidad promedio')
+plt.ylabel('Simetria')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
 
 
 print('Ejercicio 2\n')
