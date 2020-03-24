@@ -60,7 +60,9 @@ def dErr(x, y, w):
 	derivada = x.dot(w) - y.reshape(-1,1)
 
 	# el cuadrado pasa a ser un *2, y restamos una al exponente
-	derivada = 2 * np.mean(x * derivada)
+	derivada = 2 * np.mean(x * derivada, axis=0)
+
+	derivada = derivada.reshape(-1, 1)
 
 	return derivada
 
@@ -69,7 +71,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
     #
 	# diapositiva 17, jussto antes del metodo de newton
 
-	w = np.zeros((3, 1), np.float64)
+	w = np.zeros((x.shape[1], 1), np.float64)
 
 	iterations = 0
 
@@ -91,12 +93,11 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
 # Pseudoinversa
 def pseudoinverse(matriz_x, vector_y):
     #
-
 	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.transpose.html
 	x_traspuesta = matriz_x.transpose()
 
 	# cambiamos de forma Y, no sabemos cuantas filas tendrá, pero tendrá una única columna
-	y_traspuesto = y.reshape(-1, 1)
+	y_traspuesto = vector_y.reshape(-1, 1)
 
 	# multiplicamos x por su traspuesta https://docs.scipy.org/doc/numpy/reference/generated/numpy.dot.html
 	x_pseudoinversa = x_traspuesta.dot(matriz_x)
@@ -118,7 +119,7 @@ x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
 x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
 
-eta = 0.1
+eta = 0.01
 tam_batch = 64
 
 w, iteraciones = sgd(x, y, eta, tam_batch)
@@ -143,22 +144,17 @@ for etiqueta in etiquetas:
 	# los dibujamos como scatterplot con su respectivo color
 	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
 
-# pendiente de la recta Ax +By + C = -A/B
-pendiente = -w[0]/w[1]
-print('Pendiente: ',pendiente)
+# ecuacion y = w0 + w1 * x1 + w2 * x2, queremos averiguar x2
+# pintamos dos puntos, x1 = 0 y x1 = 1, siempre suponemos y = 0
+# en el caso de x1 = 0, tenemos 0 = w0 + 0 * w2 * x2
+# luego x2 = -w0/w2
+x2_para_x1_0 = -w[0]/w[2]
 
-# ordenada en el origen de la recta Ax + By + C = -C/B
-ordenada_origen = -w[2]/w[1]
-print('Ordenada en el origen: ',ordenada_origen)
+# en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
+# luego x2 = (-w0 - w1) /w2
+x2_para_x1_1 = (-w[0] - w[1])/w[2]
 
-
-# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
-# buscamos el minimo y el maximo
-minimo = x[:,1].min(axis=0)
-maximo = x[:,1].max(axis=0)
-
-# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
-plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
+plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
 
 plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
 plt.xlabel('Intensidad promedio')
@@ -170,55 +166,6 @@ plt.show()
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
-
-
-
-
-
-
-eta = 0.01
-
-w, iteraciones = sgd(x, y, eta, tam_batch)
-
-print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
-print ("Ein: ", Err(x,y,w))
-print ("Eout: ", Err(x_test, y_test, w))
-
-
-plt.clf()
-
-for etiqueta in etiquetas:
-	# en Y buscamos los puntos que coinciden con la etiqueta
-	indice = np.where(y == etiqueta)
-	# los dibujamos como scatterplot con su respectivo color
-	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
-
-
-# pendiente de la recta Ax +By + C = -A/B
-pendiente = -w[0]/w[1]
-print('Pendiente: ',pendiente)
-
-# ordenada en el origen de la recta Ax + By + C = -C/B
-ordenada_origen = -w[2]/w[1]
-print('Ordenada en el origen: ',ordenada_origen)
-
-
-# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
-# buscamos el minimo y el maximo
-minimo = x[:,1].min(axis=0)
-maximo = x[:,1].max(axis=0)
-
-# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
-plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
-
-
-plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
-plt.xlabel('Intensidad promedio')
-plt.ylabel('Simetria')
-plt.legend()
-plt.show()
-
-input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -241,23 +188,17 @@ for etiqueta in etiquetas:
 	# los dibujamos como scatterplot con su respectivo color
 	plt.scatter(x[indice, 1], x[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
 
+# ecuacion y = w0 + w1 * x1 + w2 * x2, queremos averiguar x2
+# pintamos dos puntos, x1 = 0 y x1 = 1, siempre suponemos y = 0
+# en el caso de x1 = 0, tenemos 0 = w0 + 0 * w2 * x2
+# luego x2 = -w0/w2
+x2_para_x1_0 = -w[0]/w[2]
 
-# pendiente de la recta Ax +By + C = -A/B
-pendiente = -w[0]/w[1]
-print('Pendiente: ',pendiente)
+# en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
+# luego x2 = (-w0 - w1) /w2
+x2_para_x1_1 = (-w[0] - w[1])/w[2]
 
-# ordenada en el origen de la recta Ax + By + C = -C/B
-ordenada_origen = -w[2]/w[1]
-print('Ordenada en el origen: ',ordenada_origen)
-
-# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
-# buscamos el minimo y el maximo
-minimo = x[:,1].min(axis=0)
-maximo = x[:,1].max(axis=0)
-
-# pintamos dos puntos, el que tiene x minimo y x maximo usando la ecuación general de la recta
-plt.plot([minimo, maximo], [pendiente * minimo + ordenada_origen, pendiente * maximo + ordenada_origen], 'k-')
-
+plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
 
 plt.title('Bondad del resultado usando la pseudoinversa\n')
 plt.xlabel('Intensidad promedio')
@@ -318,7 +259,7 @@ def F(x1, x2):
 # parametro 2: porcentaje de etiquetas al que aplicar el ruido
 def ruido(etiquetas, porcentaje):
 
-	n_etiquetas = etiquetas
+	n_etiquetas = etiquetas.copy()
 
 	num_etiquetas = len(n_etiquetas)
 
@@ -362,7 +303,7 @@ plt.show()
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
-ruido(etiquetas, 0.1)
+etiquetas = ruido(etiquetas, 0.1)
 
 
 
@@ -386,11 +327,70 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # apartado d
 
-caracteristicas = [1, muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1]]
+
+unos = np.ones((muestra_entrenamiento.shape[0], 1), dtype=np.float64)
+print(unos[: 10])
+
+print(muestra_entrenamiento[: 10])
+
+# https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+caracteristicas = np.c_[unos, muestra_entrenamiento]
+
+
+print(caracteristicas[: 10])
+
 
 #https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
 
 unos = np.ones((1000, 1), dtype=np.float64)
 
-eta = 0.1
-w, iteraciones = sgd(np.c_[unos, muestra_entrenamiento[:, 0]], muestra_entrenamiento[:, 1], 0.1, 64)
+eta = 0.01
+w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
+
+
+
+plt.clf()
+
+
+
+# ecuacion y = w0 + w1 * x1 + w2 * x2, queremos averiguar x2
+# pintamos dos puntos, x1 = 0 y x1 = 1, siempre suponemos y = 0
+# en el caso de x1 = 0, tenemos 0 = w0 + 0 * w2 * x2
+# luego x2 = -w0/w2
+x2_para_x1_0 = -w[0]/w[2]
+
+# en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
+# luego x2 = (-w0 - w1) /w2
+x2_para_x1_1 = (-w[0] - w[1])/w[2]
+
+plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
+
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme tras aplicar ruido')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+plt.ylim(bottom = -1.1, top = 1.1)
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
+
+
+
+
+
+
+## para mas adelante
+
+#caracteristicas = np.c_[unos, muestra_entrenamiento, muestra_entrenamiento[:, 0]*muestra_entrenamiento[:, 1],  np.square(muestra_entrenamiento[:, 0]),  np.square(muestra_entrenamiento[:, 1])]
