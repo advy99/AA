@@ -65,7 +65,7 @@ def dErr(x, y, w):
 	return derivada
 
 # Gradiente Descendente Estocastico
-def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones):
+def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
     #
 	# diapositiva 17, jussto antes del metodo de newton
 
@@ -120,9 +120,8 @@ x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
 eta = 0.1
 tam_batch = 64
-iteraciones = 100
 
-w, iteraciones = sgd(x, y, eta, tam_batch, iteraciones)
+w, iteraciones = sgd(x, y, eta, tam_batch)
 print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
 print ("Ein: ", Err(x,y,w))
 print ("Eout: ", Err(x_test, y_test, w))
@@ -148,11 +147,13 @@ for etiqueta in etiquetas:
 pendiente = -w[0]/w[1]
 print('Pendiente: ',pendiente)
 
+# ordenada en el origen de la recta Ax + By + C = -C/B
 ordenada_origen = -w[2]/w[1]
 print('Ordenada en el origen: ',ordenada_origen)
 
-otro_punto = ordenada_origen + 1
 
+# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
+# buscamos el minimo y el maximo
 minimo = x[:,1].min(axis=0)
 maximo = x[:,1].max(axis=0)
 
@@ -177,7 +178,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 eta = 0.01
 
-w, iteraciones = sgd(x, y, eta, tam_batch, iteraciones)
+w, iteraciones = sgd(x, y, eta, tam_batch)
 
 print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
 print ("Ein: ", Err(x,y,w))
@@ -197,11 +198,13 @@ for etiqueta in etiquetas:
 pendiente = -w[0]/w[1]
 print('Pendiente: ',pendiente)
 
+# ordenada en el origen de la recta Ax + By + C = -C/B
 ordenada_origen = -w[2]/w[1]
 print('Ordenada en el origen: ',ordenada_origen)
 
-otro_punto = ordenada_origen + 1
 
+# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
+# buscamos el minimo y el maximo
 minimo = x[:,1].min(axis=0)
 maximo = x[:,1].max(axis=0)
 
@@ -243,11 +246,12 @@ for etiqueta in etiquetas:
 pendiente = -w[0]/w[1]
 print('Pendiente: ',pendiente)
 
+# ordenada en el origen de la recta Ax + By + C = -C/B
 ordenada_origen = -w[2]/w[1]
 print('Ordenada en el origen: ',ordenada_origen)
 
-otro_punto = ordenada_origen + 1
-
+# de los valores de x en el eje 1 (el que pintamos sobre el eje x)
+# buscamos el minimo y el maximo
 minimo = x[:,1].min(axis=0)
 maximo = x[:,1].max(axis=0)
 
@@ -268,6 +272,13 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
+"""
+
+PUNTO 2
+
+
+"""
+
 
 print('Ejercicio 2\n')
 # Simula datos en un cuadrado [-size,size]x[-size,size]
@@ -275,3 +286,111 @@ def simula_unif(N, d, size):
 	return np.random.uniform(-size,size,(N,d))
 
 #Seguir haciendo el ejercicio...
+
+
+# Apartado a)
+
+# usamos la funcion dada para obtener la muestra
+muestra_entrenamiento = simula_unif(1000, 2, 1)
+
+plt.clf()
+plt.scatter(muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1], c='b')
+plt.title('Muestra de entrenamiento generada por una distribución uniforme')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+
+plt.show()
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+# apartado b)
+
+# funcion F dada
+def F(x1, x2):
+	valor = np.square(x1 - 0.2) + np.square(x2) - 0.6
+
+	return np.sign(valor)
+
+# funcion para aplicar el ruido
+# Parametro 1: array de etiquetas donde aplicar el ruido: suponemos que son 1/-1
+# parametro 2: porcentaje de etiquetas al que aplicar el ruido
+def ruido(etiquetas, porcentaje):
+
+	n_etiquetas = etiquetas
+
+	num_etiquetas = len(n_etiquetas)
+
+	num_a_aplicar = num_etiquetas * porcentaje
+	num_a_aplicar = int(round(num_a_aplicar))
+
+	indices = np.random.choice(range(num_etiquetas), num_a_aplicar, replace=False)
+
+	print('Numero de etiquetas: ', num_etiquetas )
+	print('Numero al que le tenemos que aplicar ruido: ', num_a_aplicar)
+	print('Tamaño de los indices a los que les vamos a aplicar ruido: ', len(indices))
+
+	input("\n--- Pulsar tecla para continuar ---\n")
+
+
+	for i in indices:
+		n_etiquetas[i] = -n_etiquetas[i]
+
+	return n_etiquetas
+
+etiquetas = F(muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1])
+
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'blue', -1: 'red'}
+
+plt.clf()
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme antes de aplicar ruido')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+ruido(etiquetas, 0.1)
+
+
+
+plt.clf()
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme tras aplicar ruido')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+# apartado d
+
+caracteristicas = [1, muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1]]
+
+#https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+
+unos = np.ones((1000, 1), dtype=np.float64)
+
+eta = 0.1
+w, iteraciones = sgd(np.c_[unos, muestra_entrenamiento[:, 0]], muestra_entrenamiento[:, 1], 0.1, 64)
