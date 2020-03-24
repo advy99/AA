@@ -261,7 +261,7 @@ mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
 
 
-eta = 0.1
+eta = 0.01
 maxIter = 50
 
 # en este caso no tenemos el error como minimo, luego lo establecemos a
