@@ -1,9 +1,19 @@
-#  Antonio David Villegas Yeguas
-#
+# -*- coding: utf-8 -*-
+"""
+TRABAJO 2.
+Nombre Estudiante: Antonio David Villegas
+"""
+
 
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import Add
+from sympy.solvers import solve
+from sympy import Symbol, var
+
+
+#from sympy.abc import z
 
 np.random.seed(1)
 
@@ -71,6 +81,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
     #
 	# diapositiva 17, jussto antes del metodo de newton
 
+	# el tamaño de w será dependiendo del numero de elementos de x
 	w = np.zeros((x.shape[1], 1), np.float64)
 
 	iterations = 0
@@ -133,7 +144,7 @@ num5 = 1
 num1 = -1
 
 etiquetas = (num1, num5)
-colores = {num1: 'blue', num5: 'red'}
+colores = {num1: 'b', num5: 'r'}
 valores = {num1: 1, num5: 5}
 
 plt.clf()
@@ -153,7 +164,6 @@ x2_para_x1_0 = -w[0]/w[2]
 # en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
 # luego x2 = (-w0 - w1) /w2
 x2_para_x1_1 = (-w[0] - w[1])/w[2]
-
 plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
 
 plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
@@ -268,12 +278,6 @@ def ruido(etiquetas, porcentaje):
 
 	indices = np.random.choice(range(num_etiquetas), num_a_aplicar, replace=False)
 
-	print('Numero de etiquetas: ', num_etiquetas )
-	print('Numero al que le tenemos que aplicar ruido: ', num_a_aplicar)
-	print('Tamaño de los indices a los que les vamos a aplicar ruido: ', len(indices))
-
-	input("\n--- Pulsar tecla para continuar ---\n")
-
 
 	for i in indices:
 		n_etiquetas[i] = -n_etiquetas[i]
@@ -302,7 +306,6 @@ plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
 etiquetas = ruido(etiquetas, 0.1)
 
 
@@ -325,8 +328,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-# apartado d
-
+# apartado c
+print('Comprobación de que tenemos las caracteristicas correctas: ')
 
 unos = np.ones((muestra_entrenamiento.shape[0], 1), dtype=np.float64)
 print(unos[: 10])
@@ -339,13 +342,18 @@ caracteristicas = np.c_[unos, muestra_entrenamiento]
 
 print(caracteristicas[: 10])
 
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 #https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
 
-unos = np.ones((1000, 1), dtype=np.float64)
-
 eta = 0.01
 w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
+
+
+print ('Bondad del resultado para SGD:\n')
+print ("Ein: ", Err(caracteristicas,etiquetas,w))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -384,6 +392,45 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
+# apartado d)
+
+total = 0
+Ein_ite = []
+Eout_ite = []
+
+
+while total < 1000:
+	total = total + 1
+	m = simula_unif(1000, 2, 1)
+	etiq = F(m[:, 0], m[:, 1])
+	etiq = ruido(etiq, 0.1)
+	unos = np.ones((m.shape[0], 1), dtype=np.float64)
+	c = np.c_[unos, m]
+	eta = 0.01
+	w, iteraciones = sgd(c, etiq, eta, 64)
+	Ein_ite.append(Err(c, etiq, w))
+
+	m_out = simula_unif(1000, 2, 1)
+	etiq_out = F(m_out[:, 0], m_out[:, 1])
+	etiq_out = ruido(etiq_out, 0.1)
+	c_out = np.c_[unos, m_out]
+	Eout_ite.append(Err(c_out, etiq_out, w))
+
+
+Ein_ite = np.array(Ein_ite, dtype=np.float64)
+Eout_ite = np.array(Eout_ite, dtype=np.float64)
+
+Ein_medio = Ein_ite.mean()
+Eout_medio = Eout_ite.mean()
+
+
+# apartado e) -> en el PDF
+
+print('Error medio dentro de la muestra: ', Ein_medio)
+print('Error medio fuera de la muestra: ', Eout_medio)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -391,6 +438,194 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-## para mas adelante
 
-#caracteristicas = np.c_[unos, muestra_entrenamiento, muestra_entrenamiento[:, 0]*muestra_entrenamiento[:, 1],  np.square(muestra_entrenamiento[:, 0]),  np.square(muestra_entrenamiento[:, 1])]
+
+
+
+
+
+
+
+
+
+## Experimento con distintas caracteristicas
+
+
+muestra_entrenamiento = simula_unif(1000, 2, 1)
+
+plt.clf()
+plt.scatter(muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1], c='b')
+plt.title('Muestra de entrenamiento generada por una distribución uniforme para la versión con más caracterésticas')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+
+plt.show()
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+# apartado b)
+
+
+etiquetas = F(muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1])
+
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'blue', -1: 'red'}
+
+plt.clf()
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme antes de aplicar ruido para la versión con más caracterésticas')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+etiquetas = ruido(etiquetas, 0.1)
+
+
+
+plt.clf()
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme tras aplicar ruido para la versión con más caracterésticas')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+# apartado c
+print('Comprobación de que tenemos las caracteristicas correctas: ')
+
+unos = np.ones((muestra_entrenamiento.shape[0], 1), dtype=np.float64)
+print(unos[: 10])
+
+print(muestra_entrenamiento[: 10])
+
+# https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+caracteristicas = np.c_[unos, muestra_entrenamiento, muestra_entrenamiento[:, 0]*muestra_entrenamiento[:, 1],  np.square(muestra_entrenamiento[:, 0]),  np.square(muestra_entrenamiento[:, 1])]
+
+
+print(caracteristicas[: 10])
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+#https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+
+eta = 0.01
+w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
+
+
+print ('Bondad del resultado para SGD:\n')
+print ("Ein: ", Err(caracteristicas,etiquetas,w))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+print(w)
+
+plt.clf()
+
+
+
+
+valores_entre_cero_uno = []
+valores_a_dibujar_sup = []
+valores_a_dibujar_inf = []
+
+i = -1
+
+z = Symbol('x')
+
+while i <= 1:
+	valores_funcion = solve(w[0] + w[1]*i + w[2]*z + w[3]*i*z + w[4]*i*i + w[5]*z*z, z)
+
+	if not isinstance(valores_funcion[0][0], Add):
+		valores_entre_cero_uno.append(i)
+		valores_a_dibujar_inf.append(valores_funcion[0])
+	if not isinstance(valores_funcion[1][0], Add):
+		valores_a_dibujar_sup.append(valores_funcion[1])
+	i = i + 1/100
+
+valores_a_dibujar_sup = np.array(valores_a_dibujar_sup)
+valores_a_dibujar_inf = np.array(valores_a_dibujar_inf)
+
+
+plt.plot(valores_entre_cero_uno, valores_a_dibujar_sup, "-k")
+plt.plot(valores_entre_cero_uno, valores_a_dibujar_inf, "-k")
+
+
+for etiqueta in posibles_etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(etiquetas == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
+
+plt.title('Muestra de entrenamiento generada por una distribución uniforme tras aplicar ruido para la versión con más caracterésticas')
+plt.xlabel('Valor x_1')
+plt.ylabel('Valor x_2')
+#plt.ylim(bottom = -1.1, top = 1.1)
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+# apartado d)
+
+total = 0
+Ein_ite = []
+Eout_ite = []
+
+while total < 1000:
+	total = total + 1
+	m = simula_unif(1000, 2, 1)
+	etiq = F(m[:, 0], m[:, 1])
+	etiq = ruido(etiq, 0.1)
+	unos = np.ones((m.shape[0], 1), dtype=np.float64)
+	c = np.c_[unos, m, m[:, 0]*m[:, 1],  np.square(m[:, 0]),  np.square(m[:, 1])]
+	eta = 0.01
+	w, iteraciones = sgd(c, etiq, eta, 64)
+	Ein_ite.append(Err(c, etiq, w))
+
+	m_out = simula_unif(1000, 2, 1)
+	etiq_out = F(m_out[:, 0], m_out[:, 1])
+	etiq_out = ruido(etiq_out, 0.1)
+	c_out = np.c_[unos, m, m[:, 0]*m[:, 1],  np.square(m[:, 0]),  np.square(m[:, 1])]
+	Eout_ite.append(Err(c_out, etiq_out, w))
+
+
+Ein_ite = np.array(Ein_ite, dtype=np.float64)
+Eout_ite = np.array(Eout_ite, dtype=np.float64)
+
+Ein_medio = Ein_ite.mean()
+Eout_medio = Eout_ite.mean()
+
+
+# apartado e) -> en el PDF
+
+print('Error medio dentro de la muestra: ', Ein_medio)
+print('Error medio fuera de la muestra: ', Eout_medio)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")

@@ -64,7 +64,7 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 
 		w_j = w_j - tasa_aprendizaje * gradFuncion(w_j[0], w_j[1])
 		error = funcion(w_j[0], w_j[1])
-		valores = np.append(valores, funcion(w_j[0], w_j[1]))
+		valores = np.append(valores, error)
 		print('Valor de la función tras ', iterations, ' iteraciones: ', error )
 		iterations = iterations + 1
 
@@ -89,6 +89,8 @@ print ('Coordenadas iniciales: (', initial_point[0], ', ', initial_point[1],')')
 print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
 print ('Valor de la función en dichas coordenadas', E(w[0], w[1]))
 
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 # DISPLAY FIGURE
 from mpl_toolkits.mplot3d import Axes3D
@@ -108,11 +110,10 @@ ax.set_xlabel('u')
 ax.set_ylabel('v')
 ax.set_zlabel('E(u,v)')
 
-input("\n--- Pulsar tecla para continuar ---\n")
 
 plt.show()
 
-
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -157,9 +158,11 @@ def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
 	ax.set_ylabel('y')
 	ax.set_zlabel('F(x,y)')
 
-	input("\n--- Pulsar tecla para continuar ---\n")
 
 	plt.show()
+
+	input("\n--- Pulsar tecla para continuar ---\n")
+
 
 	plt.clf()
 
@@ -174,7 +177,7 @@ def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
 
 	input("\n--- Pulsar tecla para continuar ---\n")
 
-
+	return w, it, valores_descenso
 
 
 
@@ -189,10 +192,12 @@ maxIter = 50
 error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
 
+diferencias_valor = []
+
 ## llamamos a la función que nos ejecutará y mostrará las gráficas de F
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
-
+diferencias_valor.append(valor_descenso)
 
 
 
@@ -211,7 +216,31 @@ error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
 #w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
 
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor.append(valor_descenso)
+
+## mostramos en la misma grafica las diferencias
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Tasa aprendizaje = 0.1')
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con una tasa de aprendizaje de 0.1 y de 0.01 con punto inicial {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
 
 
 
@@ -229,11 +258,40 @@ maxIter = 50
 error2get = -np.Infinity
 initial_point = np.array([2.1,-2.1])
 
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor = []
+diferencias_valor.append(valor_descenso)
 
 # con tasa de aprendizaje 0.1
 eta = 0.1
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor.append(valor_descenso)
+
+## mostramos en la misma grafica las diferencias
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Tasa aprendizaje = 0.1')
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con una tasa de aprendizaje de 0.1 y de 0.01 con punto inicial {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
 
 
 
@@ -248,12 +306,36 @@ maxIter = 50
 error2get = -np.Infinity
 initial_point = np.array([3.0,-3.0])
 
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor = []
+diferencias_valor.append(valor_descenso)
 
 # con tasa de aprendizaje 0.1
 eta = 0.1
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
+diferencias_valor.append(valor_descenso)
+
+## mostramos en la misma grafica las diferencias
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Tasa aprendizaje = 0.1')
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con una tasa de aprendizaje de 0.1 y de 0.01 con punto inicial {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -270,11 +352,38 @@ maxIter = 50
 error2get = -np.Infinity
 initial_point = np.array([1.5,1.5])
 
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor = []
+diferencias_valor.append(valor_descenso)
+
+
+eta = 0.1
 
 # con tasa de aprendizaje 0.1
-eta = 0.1
-mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
+
+diferencias_valor.append(valor_descenso)
+
+## mostramos en la misma grafica las diferencias
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Tasa aprendizaje = 0.1')
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con una tasa de aprendizaje de 0.1 y de 0.01 con punto inicial {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
