@@ -42,7 +42,7 @@ def dFx(x, y):
 def dFy(x, y):
     return np.float64( 4*y + 8 + 4*np.pi*np.sin(2*np.pi*x)*np.cos(2*np.pi*y) )#Derivada parcial de E con respecto a v
 
-#Gradiente de E
+#Gradiente de F
 def gradF(x, y):
     return np.array([dFx(x, y), dFy(x, y)])
 
@@ -62,8 +62,10 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 	# o el error es menor que el error máximo permitido
 	while iterations < maxIter and error > maxError:
 
+		# aplicamos la función dada en teoria
 		w_j = w_j - tasa_aprendizaje * gradFuncion(w_j[0], w_j[1])
 		error = funcion(w_j[0], w_j[1])
+		# guardamos los valores, los usaremos más adelante
 		valores = np.append(valores, error)
 		print('Valor de la función tras ', iterations, ' iteraciones: ', error )
 		iterations = iterations + 1
@@ -74,13 +76,14 @@ def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxEr
 	return w, iterations, valores
 
 
+# aplicamos el gradiente
 eta = 0.1
 maxIter = 10000000000
 error2get = 1e-14
 initial_point = np.array([1.0,1.0])
 w, it, valores_descenso = gradient_descent(E, gradE, initial_point, eta, maxIter, error2get)
 
-
+# mostramos los distintos valores de ejecución
 print ('Tasa de aprendizaje: ', eta)
 print ('Error mínimo permitido: ', error2get)
 print ('Numero de iteraciones maximas: ', maxIter)
@@ -126,11 +129,12 @@ Apartado 1.3: cambiamos la función
 """
 
 
-
+# una función ya que vamos a hacer esto muchas veces
 def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
+	# ejecutamos el gradiente
 	w, it, valores_descenso = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
 
-
+	# mostramos los datos y resultados
 	print ('Tasa de aprendizaje: ', eta)
 	print ('Error mínimo permitido: ', error2get)
 	print ('Numero de iteraciones maximas: ', maxIter)
@@ -139,7 +143,7 @@ def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
 	print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
 	print ('Valor de la función en dichas coordenadas', F(w[0], w[1]))
 
-
+	# mostramos la figura
 	# DISPLAY FIGURE
 	from mpl_toolkits.mplot3d import Axes3D
 	x = np.linspace(-30, 30, 50)
@@ -163,7 +167,7 @@ def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
 
 	input("\n--- Pulsar tecla para continuar ---\n")
 
-
+	# dibujamos los valores por los que ha ido pasando la funcion
 	plt.clf()
 
 	plt.title('Ejercicio 1.3. Descenso de gradiente sobre F(x,y)\n con punto inicial {}, {}, tasa de aprendizaje {} y un maximo de iteraciones de {}'.format(initial_point[0], initial_point[1], eta, maxIter))
@@ -183,6 +187,7 @@ def mostrar_funcion_F(eta, maxIter, error2get, initial_point):
 
 
 
+# ejecutamos para eta = 0.01
 eta = 0.01
 maxIter = 50
 
@@ -197,6 +202,7 @@ diferencias_valor = []
 ## llamamos a la función que nos ejecutará y mostrará las gráficas de F
 w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, initial_point)
 
+# almacenamos las variaciones del valor, para despues comparar eta = 0.01 y 0.1
 diferencias_valor.append(valor_descenso)
 
 
@@ -220,7 +226,7 @@ w, iteraciones, valor_descenso = mostrar_funcion_F(eta, maxIter, error2get, init
 
 diferencias_valor.append(valor_descenso)
 
-## mostramos en la misma grafica las diferencias
+## mostramos en la misma grafica las diferencias entre el avance del valor
 plt.clf()
 
 diferencias_valor = np.array(diferencias_valor)

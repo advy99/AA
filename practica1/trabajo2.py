@@ -13,8 +13,6 @@ from sympy.solvers import solve
 from sympy import Symbol, var
 
 
-#from sympy.abc import z
-
 np.random.seed(1)
 
 
@@ -58,6 +56,8 @@ def Err(x,y,w):
 	# basicamente, hacemos w * x - y al cuadrado, y le hacemos la media
 
 	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.square.html
+	# cambiamos la forma de y, ya que como vemos en las diapositivas, y tiene una columna
+	# y muchas filas, pero aqui tenemos una fila y muchas columnas
 	err = np.square(x.dot(w) - y.reshape(-1,1))
 
 	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html
@@ -66,6 +66,7 @@ def Err(x,y,w):
 	return err
 
 def dErr(x, y, w):
+	#derivada como hemos visto en teoria
 	# la parte interna sigue igual
 	derivada = x.dot(w) - y.reshape(-1,1)
 
@@ -77,7 +78,7 @@ def dErr(x, y, w):
 	return derivada
 
 # Gradiente Descendente Estocastico
-def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
+def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 2000):
     #
 	# diapositiva 17, jussto antes del metodo de newton
 
@@ -86,6 +87,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
 
 	iterations = 0
 
+	# en este caso solo tenemos de condicion las iteraciones
 	while iterations < maxIteraciones:
 
 		iterations = iterations + 1
@@ -133,10 +135,15 @@ x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 eta = 0.01
 tam_batch = 64
 
+# ejecutamos y valoramos los errores
 w, iteraciones = sgd(x, y, eta, tam_batch)
 print ('Bondad del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
 print ("Ein: ", Err(x,y,w))
 print ("Eout: ", Err(x_test, y_test, w))
+
+print ('Bondad media del resultado para grad. descendente estocastico con tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+print ("Ein: ", Err(x,y,w).mean())
+print ("Eout: ", Err(x_test, y_test, w).mean())
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -166,7 +173,35 @@ x2_para_x1_0 = -w[0]/w[2]
 x2_para_x1_1 = (-w[0] - w[1])/w[2]
 plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
 
-plt.title('Bondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+plt.title('\nBondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones:\n'.format(eta, tam_batch, iteraciones))
+plt.xlabel('Intensidad promedio')
+plt.ylabel('Simetria')
+plt.legend()
+plt.show()
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+plt.clf()
+
+for etiqueta in etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(y_test == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(x_test[indice, 1], x_test[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
+
+# ecuacion y = w0 + w1 * x1 + w2 * x2, queremos averiguar x2
+# pintamos dos puntos, x1 = 0 y x1 = 1, siempre suponemos y = 0
+# en el caso de x1 = 0, tenemos 0 = w0 + 0 * w2 * x2
+# luego x2 = -w0/w2
+x2_para_x1_0 = -w[0]/w[2]
+
+# en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
+# luego x2 = (-w0 - w1) /w2
+x2_para_x1_1 = (-w[0] - w[1])/w[2]
+plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
+
+plt.title('\nBondad del resultado para grad. descendente estocastico\ncon tasa de aprendizaje {}, tamaño de batch de {} y {} iteraciones\n fuera de la muestra:\n'.format(eta, tam_batch, iteraciones))
 plt.xlabel('Intensidad promedio')
 plt.ylabel('Simetria')
 plt.legend()
@@ -179,13 +214,16 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-
 #Seguir haciendo el ejercicio...
 
 w = pseudoinverse(x, y)
 print ('Bondad del resultado para pseudoinversa:\n')
 print ("Ein: ", Err(x,y,w))
 print ("Eout: ", Err(x_test, y_test, w))
+
+print ('Bondad media del resultado para pseudoinversa:\n')
+print ("Ein: ", Err(x,y,w).mean())
+print ("Eout: ", Err(x_test, y_test, w).mean())
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -219,6 +257,33 @@ plt.show()
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
+plt.clf()
+
+for etiqueta in etiquetas:
+	# en Y buscamos los puntos que coinciden con la etiqueta
+	indice = np.where(y_test == etiqueta)
+	# los dibujamos como scatterplot con su respectivo color
+	plt.scatter(x_test[indice, 1], x_test[indice,2], c=colores[etiqueta], label='{}'.format(valores[etiqueta]))
+
+# ecuacion y = w0 + w1 * x1 + w2 * x2, queremos averiguar x2
+# pintamos dos puntos, x1 = 0 y x1 = 1, siempre suponemos y = 0
+# en el caso de x1 = 0, tenemos 0 = w0 + 0 * w2 * x2
+# luego x2 = -w0/w2
+x2_para_x1_0 = -w[0]/w[2]
+
+# en el caso de x1 = 1, tenemos 0 = w0 + w1 * w2 * x2
+# luego x2 = (-w0 - w1) /w2
+x2_para_x1_1 = (-w[0] - w[1])/w[2]
+
+plt.plot([0, 1], [x2_para_x1_0, x2_para_x1_1], 'k-', label='Modelo de regresión obtenido')
+
+plt.title('Bondad del resultado usando la pseudoinversa\n')
+plt.xlabel('Intensidad promedio')
+plt.ylabel('Simetria')
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
@@ -353,6 +418,7 @@ w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
 
 print ('Bondad del resultado para SGD:\n')
 print ("Ein: ", Err(caracteristicas,etiquetas,w))
+print ("Ein medio: ", Err(caracteristicas,etiquetas,w).mean())
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
@@ -398,8 +464,12 @@ total = 0
 Ein_ite = []
 Eout_ite = []
 
+print('Comenzando 1000 iteraciones, esto va a tardar un poco, en fin, python ...')
 
+# aplicamos 1000 veces lo explicado en todos los pasos
 while total < 1000:
+	if (total == 500):
+		print('Llevamos la mitad, ¡tu puedes python!')
 	total = total + 1
 	m = simula_unif(1000, 2, 1)
 	etiq = F(m[:, 0], m[:, 1])
@@ -407,7 +477,7 @@ while total < 1000:
 	unos = np.ones((m.shape[0], 1), dtype=np.float64)
 	c = np.c_[unos, m]
 	eta = 0.01
-	w, iteraciones = sgd(c, etiq, eta, 64)
+	w, iteraciones = sgd(c, etiq, eta, 64, 1500)
 	Ein_ite.append(Err(c, etiq, w))
 
 	m_out = simula_unif(1000, 2, 1)
@@ -455,7 +525,7 @@ muestra_entrenamiento = simula_unif(1000, 2, 1)
 
 plt.clf()
 plt.scatter(muestra_entrenamiento[:, 0], muestra_entrenamiento[:, 1], c='b')
-plt.title('Muestra de entrenamiento generada por una distribución uniforme para la versión con más caracterésticas')
+plt.title('Muestra de entrenamiento generada por una distribución uniforme\n para la versión con más caracterésticas')
 plt.xlabel('Valor x_1')
 plt.ylabel('Valor x_2')
 
@@ -537,27 +607,32 @@ w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
 
 print ('Bondad del resultado para SGD:\n')
 print ("Ein: ", Err(caracteristicas,etiquetas,w))
+print ("Ein medio: ", Err(caracteristicas,etiquetas,w).mean())
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
-print(w)
 
 plt.clf()
 
 
-
+print('Esto tarda un poco, que estamos calculando bastantes valores ...')
 
 valores_entre_cero_uno = []
+# tendremos la parte superior y la inferior, ya que la función tiene dos valores en el mismo punto
 valores_a_dibujar_sup = []
 valores_a_dibujar_inf = []
 
+# y = w[0] + w[1]*x1 + w[2]*x2 + w[3]*x1*x2 + w[4]*x1^2 + w[5]*x2^2
+# desde -1 hasta 1, el rango en el que generamos los puntos
 i = -1
 
 z = Symbol('x')
 
 while i <= 1:
+	# resolvemos la ecuacion para cada punto de i, suponiendo y = 0
 	valores_funcion = solve(w[0] + w[1]*i + w[2]*z + w[3]*i*z + w[4]*i*i + w[5]*z*z, z)
 
+	# si los valores obtenidos no son imaginarios los añadimos a los que hay que dibujar
+	# (Sympy representa los imaginarios como instancia de Add)
 	if not isinstance(valores_funcion[0][0], Add):
 		valores_entre_cero_uno.append(i)
 		valores_a_dibujar_inf.append(valores_funcion[0])
@@ -568,18 +643,18 @@ while i <= 1:
 valores_a_dibujar_sup = np.array(valores_a_dibujar_sup)
 valores_a_dibujar_inf = np.array(valores_a_dibujar_inf)
 
-
+# dibujamos ambas lineas, la superior y la inferior
 plt.plot(valores_entre_cero_uno, valores_a_dibujar_sup, "-k")
 plt.plot(valores_entre_cero_uno, valores_a_dibujar_inf, "-k")
 
-
+# dibujamos los puntos
 for etiqueta in posibles_etiquetas:
 	# en Y buscamos los puntos que coinciden con la etiqueta
 	indice = np.where(etiquetas == etiqueta)
 	# los dibujamos como scatterplot con su respectivo color
 	plt.scatter(muestra_entrenamiento[indice, 0], muestra_entrenamiento[indice,1], c=colores[etiqueta],  label='{}'.format( etiqueta ))
 
-plt.title('Muestra de entrenamiento generada por una distribución uniforme tras aplicar ruido para la versión con más caracterésticas')
+plt.title('Muestra de entrenamiento generada por una distribución uniforme\n tras aplicar ruido para la versión con más caracterésticas')
 plt.xlabel('Valor x_1')
 plt.ylabel('Valor x_2')
 #plt.ylim(bottom = -1.1, top = 1.1)
@@ -597,7 +672,12 @@ total = 0
 Ein_ite = []
 Eout_ite = []
 
+print('Comenzando 1000 iteraciones, esto va a tardar un poco, en fin, python ...')
+
+# aplicamos 1000 veces lo explicado en todos los pasos
 while total < 1000:
+	if (total == 500):
+		print('Llevamos la mitad, ¡tu puedes python!')
 	total = total + 1
 	m = simula_unif(1000, 2, 1)
 	etiq = F(m[:, 0], m[:, 1])
@@ -605,7 +685,7 @@ while total < 1000:
 	unos = np.ones((m.shape[0], 1), dtype=np.float64)
 	c = np.c_[unos, m, m[:, 0]*m[:, 1],  np.square(m[:, 0]),  np.square(m[:, 1])]
 	eta = 0.01
-	w, iteraciones = sgd(c, etiq, eta, 64)
+	w, iteraciones = sgd(c, etiq, eta, 64, 1500)
 	Ein_ite.append(Err(c, etiq, w))
 
 	m_out = simula_unif(1000, 2, 1)
