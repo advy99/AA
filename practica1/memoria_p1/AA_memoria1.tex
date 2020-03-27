@@ -1,7 +1,7 @@
 \documentclass[12pt, spanish]{article}
 \usepackage[spanish]{babel}
 \selectlanguage{spanish}
-\usepackage{natbib}
+%\usepackage{natbib}
 \usepackage{url}
 \usepackage[utf8x]{inputenc}
 \usepackage{graphicx}
@@ -12,6 +12,8 @@
 \usepackage{multirow}
 \usepackage{float}
 \usepackage{chngpage}
+
+\usepackage{amsfonts}
 
 \usepackage{subcaption}
 
@@ -174,7 +176,7 @@ Este ejercicio consistirá en implementar el algoritmo de gradiente descendente 
 
 \subsection{Implementar el algoritmo de gradiente descendente}
 
-La idea del gradiente descendente es, dada una función y un punto de inicio, mover ese punto de inicio a zonas donde la función se minimice. Esto lo conseguiremos gracias al gradiente de la función, formado por las derivadas parciales de dicha función. El gradiente de la función nos indicará en que dirección la función se minimiza y como de rápido lo hace, de forma que si la función se minimiza muy rápido, el punto se moverá más. Para controlar esto usaremos la tasa de aprendizaje, que irá multiplicada por dicho gradiente.
+La idea del gradiente descendente es, dada una función y un punto de inicio, mover ese punto de inicio a zonas donde la función se minimice. Esto lo conseguiremos gracias al gradiente de la función, formado por las derivadas parciales de dicha función. El gradiente de la función nos indicará en que dirección la función se minimiza y como de rápido lo hace, de forma que si la función se minimiza muy rápido, el punto se moverá más. Para controlar esto usaremos la tasa de aprendizaje, que irá multiplicada por dicho gradiente\cite{teoria}.
 
 Con lo explicado en el párrafo podemos entender rápidamente la ecuación general del gradiente descendente:
 
@@ -638,7 +640,7 @@ def dErr(x, y, w):
 
 \subsubsection{Gradiente descendente estocástico}
 
-La filosofía del gradiente descendente estocástico es la misma que la del gradiente descendente, con la diferencia de que en este caso solo evaluaremos algunos puntos de forma aleatoria, haciendo el cálculo mucho más rápido, logrando una mayor variabilidad, además de que esto nos da evidencias empíricas de obtener un buen mínimo local en funciones no convexas.
+La filosofía del gradiente descendente estocástico es la misma que la del gradiente descendente, con la diferencia de que en este caso solo evaluaremos algunos puntos de forma aleatoria, haciendo el cálculo mucho más rápido, logrando una mayor variabilidad, además de que esto nos da evidencias empíricas de obtener un buen mínimo local en funciones no convexas\cite{teoria}.
 
 Normalmente el tamaño de la muestra aleatoria que evaluaremos está entre 32 y 128 elementos. En la plantilla dada es usado un tamaño de 64, así que usaremos ese tamaño.
 
@@ -674,7 +676,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 1000):
 
 \subsubsection{Pseudoinversa}
 
-El algoritmo de la pseudoinversa se basa en que si nosotros tenemos unos datos de entrada X y unos datos de salida Y, asociados a X, debe existir una función que aplicada a X, transforme X a Y. Nuestro objetivo será encontrar esa función de la siguiente forma, suponiendo que $w$ es la función a encontrar:
+El algoritmo de la pseudoinversa se basa en que si nosotros tenemos unos datos de entrada X y unos datos de salida Y, asociados a X, debe existir una función que aplicada a X, transforme X a Y\cite{teoria}. Nuestro objetivo será encontrar esa función de la siguiente forma, suponiendo que $w$ es la función a encontrar:
 
 $$ wX = y $$
 
@@ -915,7 +917,7 @@ Error medio fuera de la muestra:  0.9328568587280501
 
 
 
-Para este caso usaremos las siguientes características: $(1, x_1, x_2, x_1x_2, x_1^2, x_2^2)$ que como vemos son no lineales, el ajuste de la regresión no será una linea recta, será una elipse la cual he dibujado evaluando distintos puntos de la elipse haciendo uso del paquete sympy de python:
+Para este caso usaremos las siguientes características: $(1, x_1, x_2, x_1x_2, x_1^2, x_2^2)$ que como vemos son no lineales, el ajuste de la regresión no será una linea recta, será una elipse la cual he dibujado evaluando distintos puntos de la elipse haciendo uso del paquete sympy\cite{documentacion-sympy} de python:
 
 \begin{lstlisting}
 # y = w[0] + w[1]*x1 + w[2]*x2 + w[3]*x1*x2 + w[4]*x1^2 + w[5]*x2^2
@@ -976,5 +978,212 @@ Haciendo uso de características no lineales vemos como el error medio dentro de
 
 Con respecto a cual es el modelo más adecuado, de nuevo, depende de la función a ajustar, si como en este caso, la función separa el conjunto en un subconjunto, rodeado de otros valores, las características no lineales serán mejor opción, si vemos que claramente existe una división entre los valores, como en el caso del primer apartado, el uso de características lineales se ajustará mejor.
 
+\newpage
+
+\section{Ejercicio bonus: Método de Newton}
+
+El método de Newton toma la misma idea que el gradiente descendente, pero con el objetivo de intentar encontrar el mínimo cuando está cerca de el, es decir, con el gradiente descendente conseguimos ir desde una zona con un valor bastante malo a una zona de un mínimo (ya sea global o local, como hemos comentado), mientras que con el método de Newton intentamos encontrar el mínimo cuando estamos ya en esa zona\cite{teoria}.
+
+Es decir, el método de Newton solo nos funcionará para zonas cercanas al mínimo. Esto lo conseguirá haciendo uso de las derivadas parciales de segundo orden de la función a minimizar, en concreto con la matriz hessiana\cite{m-hessiana}, formada por dichas derivadas parciales de segundo orden.
+
+También tenemos que tener en cuenta que la matriz hessiana puede ser de dos tipos:
+
+\begin{itemize}
+	\item Positiva-definida: Los menores principales de la matriz son positivos, $f$ es estrictamente convexa y alcanzaremos un mínimo local.
+	\item Negativa-definida: Los menores principales de la matriz son negativos, $f$ es estrictamente cóncava y alcanzaremos un máximo local.
+\end{itemize}
+
+Ya que nosotros intentamos minimizar la función, el supondremos ambos casos, si es positiva-definida, seguiremos la matriz hessiana y nos acercaremos a un mínimo, mientras que si es negativa-definida invertiremos la suma del gradiente, alejándonos del máximo.
+
+Es decir, nosotros intentaremos obtener el incremento de $w$:
+
+$$ \Delta w = -H^{-1} \nabla E_{in}(w_0) $$
+
+Donde $H$ es la siguiente matriz:
+
+
+\[ H =  \left( \begin{array}{cc}
+\frac{\partial^{2} f(x_1, x_2)}{\partial x_1^2} 					& \frac{\partial^{2} f(x_1, x_2)}{\partial x_1 \partial x_2} \\
+\frac{\partial^{2} f(x_1, x_2)}{\partial x_1 \partial x_2} & \frac{\partial^{2} f(x_1, x_2)}{\partial x_2^2}
+\end{array} \right ) \] 
+
+
+Si la matriz es positiva-definida, $\Delta w$ nos acercará a un mínimo, luego $w_j$ será:
+
+$$ w_j = w_j + \eta * \Delta w$$
+
+Mientras que si la matriz es negativa-definida, $\Delta w$ nos acercará a un máximo, luego iremos en la dirección contraria:
+
+$$ w_j = w_j - \eta * \Delta w$$
+
+
+\subsection{Implementación del método de Newton}
+
+Una vez vista la base teórica, para la implementación necesitaremos las segundas derivadas de $f(x_1, x_2)$. Del mismo modo que obtenía las derivadas parciales, obtengo las segundas derivadas, por no alargar más el documento no haré su desarrollo:
+
+$$\frac{\partial^{2} f(x_1, x_2)}{\partial x_1^2} =  - 8 \pi^2 sin(2 \pi x) sin(2 \pi y) + 2$$
+
+$$\frac{\partial^{2} f(x_1, x_2)}{\partial x_2^2} =  - 8 \pi^2 sin(2 \pi x) sin(2 \pi y) + 4$$
+
+$$ \frac{\partial^{2} f(x_1, x_2)}{\partial x_1 \partial x_2} = 8\pi cos(2\pi x) cos(2 \pi y) $$
+
+Con esto, definimos estas operaciones en Python de la siguiente forma:
+
+\begin{lstlisting}
+# segunda derivada parcial con respecto a x
+def ddFx(x, y):
+	return np.float64(-8*np.square(np.pi) * np.sin(2*np.pi*x) * np.sin(2*np.pi*y) + 2 )
+
+# segunda derivada parcial con respecto a y
+def ddFy(x, y):
+	return np.float64(-8*np.square(np.pi) * np.sin(2*np.pi*x) * np.sin(2*np.pi*y) + 4 )
+
+# segunda derivada respecto a x e y (son equivalentes a la de Y y x)
+def ddF(x, y):
+	return np.float64(8*np.square(np.pi) * np.cos(2*x*np.pi)*np.cos(2*y*np.pi))
+
+# matriz hessiana
+def matriz_hessiana(x, y):
+	#https://en.wikipedia.org/wiki/Hessian_matrix
+	return np.array([[ddFx(x,y), ddF(x,y)],[ddF(x,y), ddFy(x,y)]])
+\end{lstlisting}
+
+\newpage
+
+Y siguiendo la explicación teórica del método de Newton, usando el añadido para intentar buscar el mínimo de la función, la implementación en Python quedaría de la siguiente forma:
+\begin{lstlisting}
+def metodo_newton(funcion, gradFuncion, matriz_hessiana, w_0, eta = 1, maxIter = 50):
+    #metodo de newton -> diapositiva 18 de teoria
+    # 
+	iterations = 0
+	error = funcion(w_0[0], w_0[1])
+	w_j = w_0
+	valores = np.array(funcion(w_j[0], w_j[1]))
+
+	# Condición de parada, llegamos al límite de iteraciones
+	while iterations < maxIter:
+		# seguimos la formula dada en teoria
+		hessiana_invertida = -np.linalg.inv(matriz_hessiana(w_j[0], w_j[1]))
+
+		# si la hessiana es positiva_definida, apunta a un minimo, por lo que nos acercamos a ese mínimo
+		positiva_definida = w_j + eta * hessiana_invertida.dot(gradFuncion(w_j[0], w_j[1]).reshape(-1, 1)).reshape(-1,)
+		# si es negativa_definida, apunta a un máximo, por lo que nos alejamos de el
+		negativa_definida = w_j - eta * hessiana_invertida.dot(gradFuncion(w_j[0], w_j[1]).reshape(-1, 1)).reshape(-1,)
+
+		# nos quedamos con la suposición que nos minimice
+		if funcion(positiva_definida[0], positiva_definida[1]) > funcion(negativa_definida[0], negativa_definida[1]):
+			w_j = negativa_definida
+		else:
+			w_j = positiva_definida
+
+		error = funcion(w_j[0], w_j[1])
+		valores = np.append(valores, error)
+		print('Valor de la función tras ', iterations, ' iteraciones: ', error )
+		iterations = iterations + 1
+
+	w = w_j
+	return w, iterations, valores
+\end{lstlisting}
+
+Debido a que existen implementaciones con tasa de aprendizaje y otras sin tasa de aprendizaje, el valor por defecto de $\eta$ es 1, para que si queremos ejecutarlo sin tasa de aprendizaje no tenga efecto.
+
+\subsection{Comparación del valor de la función tras las distintas iteraciones}
+
+Para hacer la comparación con distintas iteraciones he ejecutado el método de Newton tres veces:
+
+\begin{itemize}
+	\item $\eta = 0.01$
+	\item $\eta = 0.1$
+	\item $\eta = 1$
+\end{itemize}
+
+Las dos primeras como comparación del método de Newton contra el gradiente descendente, y la última por comparar implementaciones que tiene en cuenta tasas de aprendizaje con una que no. Además, también ejecutaré el gradiente descendente con $\eta = 0.01$ para compararlo.
+
+Para no hacer más extenso este documento pondré las gráficas comparando las 4 ejecuciones:
+
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej3-1.png}
+ 		 \caption{Función $F(x,y)$ en el punto inicial $(1,-1)$}
+  		\label{fig:ej3-1}
+
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej3-2.png}
+ 		 \caption{Función $F(x,y)$ en el punto inicial $(2.1,-2.1)$}
+  		\label{fig:ej3-2}
+
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej3-3.png}
+ 		 \caption{Función $F(x,y)$ en el punto inicial $(3,-3)$}
+  		\label{fig:ej3-3}
+
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej3-4.png}
+ 		 \caption{Función $F(x,y)$ en el punto inicial $(1.5,-1.5)$}
+  		\label{fig:ej3-4}
+
+\end{figure}
+
+\subsection{Conclusiones del método de Newton y comparación con el gradiente descendente}
+
+Como comparación podemos ver como el método de Newton es equivalente al gradiente descendente en muchos sentidos, aunque existen dos claras diferencias:
+
+\begin{enumerate}
+	\item {Tasa de aprendizaje: La tasa de aprendizaje en el método de Newton se usará para ver como de rápido avanzamos, sin embargo, no influye para obtener el mínimo como en el gradiente descendente, en el que si escogíamos mal la $\eta$ podíamos no llegar al mínimo}
+	\item{Mínimo asegurado: Con el método de Newton nos aseguramos llegar al mínimo, un ejemplo es el de la última comparación, donde el gradiente descendente se estanca en el valor $f(x_1, x_2) = 18$, el método de Newton es capaz de salir de estas zonas donde se estanca la función.}
+\end{enumerate}
+
+Aunque también tiene ciertos problemas, como por ejemplo, de nuevo con la última comparación, la variación de la tasa de aprendizaje ha hecho que encuentre dos mínimos distintos.
+
+Otra de las peculiaridades del método de Newton es que funciona especialmente bien para encontrar mínimos si están cerca, por ejemplo, en $(2.1, -2.1)$, aunque $\eta$ es muy baja, es capaz de encontrar el mínimo, cuando en otros casos necesitaríamos más iteraciones, y esto es dado al punto donde se encuentra el mínimo, que observando la tabla obtenida con el gradiente descendente, este punto está cerca del inicial.
+
+También añadir que en nuestro caso el método de Newton se comporta bien ya que hemos tenido en cuenta que queremos minimizar, y hemos modificado el funcionamiento para que en lugar de encontrar tanto mínimos como máximos, se aleje todo lo posible de los máximos y se acerque a los mínimos.
+
+
+\newpage
+
+\section{Referencias, material y documentación usada}
+
+
+\begin{thebibliography}{9}
+
+\bibitem{teoria}
+Diapositivas de teoría
+
+\bibitem{documentacion-numpy}
+Documentación de NumPy:
+
+\url{https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.choice.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.transpose.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.dot.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.inv.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.square.html}
+
+\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html}
+
+\bibitem{documentacion-sympy}
+Documentación de Sympy \url{https://docs.sympy.org/latest/modules/solvers/solvers.html}
+
+\bibitem{m-hessiana}
+Matriz Hessiana \url{https://es.wikipedia.org/wiki/Matriz_hessiana/}
+
+
+\end{thebibliography}
 
 \end{document}
