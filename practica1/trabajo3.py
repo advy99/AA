@@ -62,11 +62,16 @@ def metodo_newton(funcion, gradFuncion, matriz_hessiana, w_0, eta = 1, maxIter =
 
 	# Condición de parada, llegamos al límite de iteraciones
 	while iterations < maxIter:
-
+		# seguimos la formula dada en teoria
 		hessiana_invertida = -np.linalg.inv(matriz_hessiana(w_j[0], w_j[1]))
+
+		# si la hessiana es positiva_definida, apunta a un minimo, por lo que nos acercamos a ese mínimo
 		positiva_definida = w_j + eta * hessiana_invertida.dot(gradFuncion(w_j[0], w_j[1]).reshape(-1, 1)).reshape(-1,)
+
+		# si es negativa_definida, apunta a un máximo, por lo que nos alejamos de el
 		negativa_definida = w_j - eta * hessiana_invertida.dot(gradFuncion(w_j[0], w_j[1]).reshape(-1, 1)).reshape(-1,)
 
+		# nos quedamos con la suposición que nos minimice
 		if funcion(positiva_definida[0], positiva_definida[1]) > funcion(negativa_definida[0], negativa_definida[1]):
 			w_j = negativa_definida
 		else:
@@ -84,9 +89,36 @@ def metodo_newton(funcion, gradFuncion, matriz_hessiana, w_0, eta = 1, maxIter =
 
 
 
+def gradient_descent(funcion, gradFuncion, w_0, tasa_aprendizaje, maxIter, maxError):
+    #
+    # gradiente descendente
+    #
+	iterations = 0
+	error = funcion(w_0[0], w_0[1])
+
+	w_j = w_0
+
+	valores = np.array(funcion(w_j[0], w_j[1]))
+
+	# Condición de parada, llegamos al límite de iteraciones
+	# o el error es menor que el error máximo permitido
+	while iterations < maxIter and error > maxError:
+
+		# aplicamos la función dada en teoria
+		w_j = w_j - tasa_aprendizaje * gradFuncion(w_j[0], w_j[1])
+		error = funcion(w_j[0], w_j[1])
+		# guardamos los valores, los usaremos más adelante
+		valores = np.append(valores, error)
+		print('Valor de la función tras ', iterations, ' iteraciones: ', error )
+		iterations = iterations + 1
 
 
-def mostrar_funcion_F(maxIter, initial_point, eta):
+	w = w_j
+
+	return w, iterations, valores
+
+
+def mostrar_funcion_F_newton(maxIter, initial_point, eta):
 	w, it, valores_descenso = metodo_newton(F, gradF, matriz_hessiana, initial_point, eta)
 
 
@@ -134,7 +166,7 @@ def mostrar_funcion_F(maxIter, initial_point, eta):
 
 	input("\n--- Pulsar tecla para continuar ---\n")
 
-
+	return w, it, valores_descenso
 
 
 
@@ -149,8 +181,12 @@ maxIter = 50
 error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
 
+diferencias_valor = []
+
 ## llamamos a la función que nos ejecutará y mostrará las gráficas de F
-mostrar_funcion_F(maxIter, initial_point, eta)
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+
+diferencias_valor.append(valor_descenso)
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -170,8 +206,50 @@ error2get = -np.Infinity
 initial_point = np.array([1.0,-1.0])
 #w, it = gradient_descent(F, gradF, initial_point, eta, maxIter, error2get)
 
-mostrar_funcion_F(maxIter, initial_point, eta)
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+
+diferencias_valor.append(valor_descenso)
+
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, 1)
+
+diferencias_valor.append(valor_descenso)
+
+
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+diferencias_valor_grad = []
+
+w, iteraciones, valor_descenso = gradient_descent(F, gradF, initial_point, 0.01, maxIter, -np.Infinity)
+diferencias_valor_grad.append(valor_descenso)
+
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+diferencias_valor_grad = np.array(diferencias_valor_grad)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+plt.scatter(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y')
+plt.scatter(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k')
+
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Newton Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Newton Tasa aprendizaje = 0.1')
+plt.plot(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y', label='Newton Tasa aprendizaje = 1')
+plt.plot(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k', label='Grad. des Tasa aprendizaje = 0.01')
+
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con tasa de apr. de 0.1, 0.01 y 1 del método de Newton vs Grad. descendente con w_0 {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
 
 
 """
@@ -186,15 +264,62 @@ maxIter = 50
 # las iteraciones
 error2get = -np.Infinity
 initial_point = np.array([2.1,-2.1])
+diferencias_valor = []
 
-mostrar_funcion_F(maxIter, initial_point, eta)
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+diferencias_valor.append(valor_descenso)
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
 eta = 0.1
-mostrar_funcion_F(maxIter, initial_point, eta)
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+diferencias_valor.append(valor_descenso)
+
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, 1)
+
+diferencias_valor.append(valor_descenso)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+diferencias_valor_grad = []
+
+w, iteraciones, valor_descenso = gradient_descent(F, gradF, initial_point, 0.01, maxIter, -np.Infinity)
+diferencias_valor_grad.append(valor_descenso)
+
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+diferencias_valor_grad = np.array(diferencias_valor_grad)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+plt.scatter(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y')
+plt.scatter(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k')
+
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Newton Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Newton Tasa aprendizaje = 0.1')
+plt.plot(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y', label='Newton Tasa aprendizaje = 1')
+plt.plot(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k', label='Grad. des Tasa aprendizaje = 0.01')
+
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con tasa de apr. de 0.1, 0.01 y 1 del método de Newton vs Grad. descendente con w_0 {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
 
 eta = 0.01
 maxIter = 50
@@ -204,14 +329,66 @@ maxIter = 50
 # las iteraciones
 error2get = -np.Infinity
 initial_point = np.array([3.0,-3.0])
+diferencias_valor = []
 
-mostrar_funcion_F(maxIter, initial_point, eta)
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+diferencias_valor.append(valor_descenso)
 
 input("\n--- Pulsar tecla para continuar ---\n")
 eta = 0.1
-mostrar_funcion_F(maxIter, initial_point, eta)
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+diferencias_valor.append(valor_descenso)
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, 1)
+
+diferencias_valor.append(valor_descenso)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+diferencias_valor_grad = []
+
+w, iteraciones, valor_descenso = gradient_descent(F, gradF, initial_point, 0.01, maxIter, -np.Infinity)
+diferencias_valor_grad.append(valor_descenso)
+
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+diferencias_valor_grad = np.array(diferencias_valor_grad)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+plt.scatter(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y')
+plt.scatter(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k')
+
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Newton Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Newton Tasa aprendizaje = 0.1')
+plt.plot(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y', label='Newton Tasa aprendizaje = 1')
+plt.plot(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k', label='Grad. des Tasa aprendizaje = 0.01')
+
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con tasa de apr. de 0.1, 0.01 y 1 del método de Newton vs Grad. descendente con w_0 {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
+
+
+
 
 eta = 0.01
 maxIter = 50
@@ -221,14 +398,59 @@ maxIter = 50
 # las iteraciones
 error2get = -np.Infinity
 initial_point = np.array([1.5,1.5])
+diferencias_valor = []
+diferencias_valor_grad = []
 
-mostrar_funcion_F(maxIter, initial_point, eta)
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+diferencias_valor.append(valor_descenso)
+
 
 input("\n--- Pulsar tecla para continuar ---\n")
 eta = 0.1
-mostrar_funcion_F(maxIter, initial_point, eta)
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, eta)
+
+diferencias_valor.append(valor_descenso)
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+w, iteraciones, valor_descenso = mostrar_funcion_F_newton(maxIter, initial_point, 1)
+
+diferencias_valor.append(valor_descenso)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+w, iteraciones, valor_descenso = gradient_descent(F, gradF, initial_point, 0.01, maxIter, -np.Infinity)
+diferencias_valor_grad.append(valor_descenso)
+
+plt.clf()
+
+diferencias_valor = np.array(diferencias_valor)
+diferencias_valor_grad = np.array(diferencias_valor_grad)
+
+plt.scatter(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b')
+plt.scatter(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r')
+plt.scatter(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y')
+plt.scatter(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k')
+
+
+plt.plot(range(diferencias_valor[0].size), diferencias_valor[0, :], c='b', label='Newton Tasa aprendizaje = 0.01')
+plt.plot(range(diferencias_valor[1].size), diferencias_valor[1, :], c='r', label='Newton Tasa aprendizaje = 0.1')
+plt.plot(range(diferencias_valor[2].size), diferencias_valor[2, :], c='y', label='Newton Tasa aprendizaje = 1')
+plt.plot(range(diferencias_valor_grad[0].size), diferencias_valor_grad[0, :], c='k', label='Grad. des Tasa aprendizaje = 0.01')
+
+
+plt.xlabel('Iteraciones')
+plt.ylabel('Valor de F(x,y)')
+plt.title('Comparación con tasa de apr. de 0.1, 0.01 y 1 del método de Newton vs Grad. descendente con w_0 {}, {}'.format(initial_point[0], initial_point[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 
