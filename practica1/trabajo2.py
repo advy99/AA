@@ -402,6 +402,7 @@ print(unos[: 10])
 print(muestra_entrenamiento[: 10])
 
 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+# unimos las caracteristicas que vamos a usar en una única variable
 caracteristicas = np.c_[unos, muestra_entrenamiento]
 
 
@@ -471,15 +472,20 @@ while total < 1000:
 	if (total == 500):
 		print('Llevamos la mitad, ¡tu puedes python!')
 	total = total + 1
+	# generamos la muestra
 	m = simula_unif(1000, 2, 1)
+	# le aplicamos la función y el ruido
 	etiq = F(m[:, 0], m[:, 1])
 	etiq = ruido(etiq, 0.1)
 	unos = np.ones((m.shape[0], 1), dtype=np.float64)
+	# creamos las caracteristicas
 	c = np.c_[unos, m]
 	eta = 0.01
+	# obtenemos el modelo a partir de la muestra de entrenamiento y lo evaluamos
 	w, iteraciones = sgd(c, etiq, eta, 64, 1500)
 	Ein_ite.append(Err(c, etiq, w))
 
+	# generamos otra muestra de test y la evaluamos
 	m_out = simula_unif(1000, 2, 1)
 	etiq_out = F(m_out[:, 0], m_out[:, 1])
 	etiq_out = ruido(etiq_out, 0.1)
@@ -591,6 +597,7 @@ print(unos[: 10])
 print(muestra_entrenamiento[: 10])
 
 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
+# unimos las caracteristicas que vamos a usar en una única variable
 caracteristicas = np.c_[unos, muestra_entrenamiento, muestra_entrenamiento[:, 0]*muestra_entrenamiento[:, 1],  np.square(muestra_entrenamiento[:, 0]),  np.square(muestra_entrenamiento[:, 1])]
 
 
@@ -598,8 +605,6 @@ print(caracteristicas[: 10])
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
-#https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html
 
 eta = 0.01
 w, iteraciones = sgd(caracteristicas, etiquetas, eta, 64)
@@ -644,7 +649,7 @@ valores_a_dibujar_sup = np.array(valores_a_dibujar_sup)
 valores_a_dibujar_inf = np.array(valores_a_dibujar_inf)
 
 # dibujamos ambas lineas, la superior y la inferior
-plt.plot(valores_entre_cero_uno, valores_a_dibujar_sup, "-k")
+plt.plot(valores_entre_cero_uno, valores_a_dibujar_sup, "-k", label='Modelo obtenido')
 plt.plot(valores_entre_cero_uno, valores_a_dibujar_inf, "-k")
 
 # dibujamos los puntos
@@ -679,15 +684,20 @@ while total < 1000:
 	if (total == 500):
 		print('Llevamos la mitad, ¡tu puedes python!')
 	total = total + 1
+	# generamos la muestra
 	m = simula_unif(1000, 2, 1)
+	# aplicamos la funcion y el ruido
 	etiq = F(m[:, 0], m[:, 1])
 	etiq = ruido(etiq, 0.1)
 	unos = np.ones((m.shape[0], 1), dtype=np.float64)
+	# calculamos las caracteristicas
 	c = np.c_[unos, m, m[:, 0]*m[:, 1],  np.square(m[:, 0]),  np.square(m[:, 1])]
 	eta = 0.01
+	# obtenemos y evaluamos el modelo a partir de la muestra de entrenamiento
 	w, iteraciones = sgd(c, etiq, eta, 64, 1500)
 	Ein_ite.append(Err(c, etiq, w))
 
+	# obtenemos y evaluamos la muestra de test con el modelo obtenido
 	m_out = simula_unif(1000, 2, 1)
 	etiq_out = F(m_out[:, 0], m_out[:, 1])
 	etiq_out = ruido(etiq_out, 0.1)
