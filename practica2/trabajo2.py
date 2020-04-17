@@ -11,7 +11,7 @@ from sympy import Symbol
 
 
 # Fijamos la semilla
-#np.random.seed()
+np.random.seed(0)
 
 def simula_unif(N, dim, rango):
 	return np.random.uniform(rango[0],rango[1],(N,dim))
@@ -122,8 +122,6 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-
-
 # Random initializations
 iterations = []
 for i in range(0,10):
@@ -139,6 +137,79 @@ input("\n--- Pulsar tecla para continuar ---\n")
 # Ahora con los datos del ejercicio 1.2.b
 
 #CODIGO DEL ESTUDIANTE
+
+plt.clf()
+
+indices_positivos = np.where(np.array(etiquetas) == 1)
+indices_positivos = indices_positivos[0]
+
+indices_negativos = np.where(np.array(etiquetas) == -1)
+indices_negativos = indices_negativos[0]
+
+
+# aplicamos el ruido a los positivos
+num_a_aplicar = len(indices_positivos) * 0.1
+num_a_aplicar = int(round(num_a_aplicar))
+indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
+
+for i in indices:
+	etiquetas[i] = -etiquetas[i]
+
+# aplicamos el ruido a los negativos
+num_a_aplicar = len(indices_negativos) * 0.1
+num_a_aplicar = int(round(num_a_aplicar))
+indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
+
+for i in indices:
+	etiquetas[i] = -etiquetas[i]
+
+
+w_0 = np.zeros(3)
+
+# no queremos tener limite de iteraciones, las ponemos a infinito
+w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, 10000, w_0)
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta con la que etiquetamos')
+
+# obtenemos 0 = w_0 + w_1 * x1 + w_2 * x_2
+
+# x_2 = (-w_0 - w_1 * x_1 )/ w_2
+
+
+plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con PLA')
+
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+	# ahora no es 0 y 1, si no 1 y 2, porque le he metido un primer 1 para usar w en el perceptron
+	plt.scatter(puntos_2d[indice, 1], puntos_2d[indice, 2], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
+plt.show()
+
+print("W obtenida: " + str(w) + "\n Iteraciones: " + str(iteraciones))
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+# Random initializations
+iterations = []
+for i in range(0,10):
+	w_0 = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, 10000, w_0)
+	iterations.append(iteraciones)
+    #CODIGO DEL ESTUDIANTE
+
+print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
