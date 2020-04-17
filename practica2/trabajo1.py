@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-TRABAJO 2
+PRACTICA 2 - EJ 1
 Nombre Estudiante: Antonio David Villegas Yeguas
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import Add
+from sympy.solvers import solve
+from sympy import Symbol
 
 
 # Fijamos la semilla
@@ -46,6 +49,9 @@ puntos_simula_unif = simula_unif(50, 2, [-50,50])
 
 plt.scatter(puntos_simula_unif[:, 0], puntos_simula_unif[:, 1], c="b")
 plt.title("Nube de 50 puntos usando simula_unif con dimensión 2 en el rango [-50, 50]")
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -58,6 +64,9 @@ puntos_simula_gaus = simula_gaus(50, 2, np.array([5,7]))
 #CODIGO DEL ESTUDIANTE
 plt.scatter(puntos_simula_gaus[:, 0], puntos_simula_gaus[:, 1], c="r")
 plt.title("Nube de 50 puntos usando simula_gaus con dimensión 2 y sigma [5, 7]")
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -66,6 +75,9 @@ plt.clf()
 
 plt.scatter(puntos_simula_unif[:, 0], puntos_simula_unif[:, 1], c="b", label="Puntos simula_unif")
 plt.scatter(puntos_simula_gaus[:, 0], puntos_simula_gaus[:, 1], c="r", label="Puntos simula_gaus")
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
 
 plt.title("Nube de 100 puntos, 50 usando simula_unif con dimensión 2 y rango [-50, 50] \ny 50 usando simula_gaus con dimensión 2 y sigma [5, 7]")
 plt.legend()
@@ -112,6 +124,9 @@ for punto in puntos_2d:
 
 plt.scatter(puntos_2d[:, 0], puntos_2d[:, 1], c="b")
 plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
 
 plt.show()
 
@@ -133,6 +148,9 @@ plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados
 plt.legend()
 plt.xlim(intervalo_trabajo)
 plt.ylim(intervalo_trabajo)
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -183,6 +201,8 @@ for etiqueta in posibles_etiquetas:
 
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
 
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
 
 plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {},\n etiquetados segun una recta con ruido (10% de los positivos y 10% de los negativos con ruido)".format(intervalo_trabajo[0], intervalo_trabajo[1]))
 plt.legend()
@@ -196,13 +216,26 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-"""
+
 
 ###############################################################################
 ###############################################################################
 ###############################################################################
 
 # EJERCICIO 1.3: Supongamos ahora que las siguientes funciones definen la frontera de clasificación de los puntos de la muestra en lugar de una recta
+
+def f1(x):
+	return np.float64((x[:, 0]-10)**2 + (x[:, 1] - 20)**2 - 400)
+
+def f2(x):
+	return np.float64( 0.5*(x[:, 0]+10)**2 + (x[:, 1]-20)**2 - 400 )
+
+def f3(x):
+	return np.float64( 0.5*(x[:, 0]-10)**2 - (x[:, 1]+20)**2 - 400 )
+
+def f4(x):
+	return np.float64( x[:, 1] - 20*x[:, 0]**2 - 5*x[:, 0] + 3 )
+
 
 def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y axis'):
     #Preparar datos
@@ -241,138 +274,13 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
 
 #CODIGO DEL ESTUDIANTE
 
-input("\n--- Pulsar tecla para continuar ---\n")
+plot_datos_cuad(puntos_2d, etiquetas, f1)
 
-###############################################################################
-###############################################################################
-###############################################################################
+plot_datos_cuad(puntos_2d, etiquetas, f2)
 
-# EJERCICIO 2.1: ALGORITMO PERCEPTRON
+plot_datos_cuad(puntos_2d, etiquetas, f3)
 
-def ajusta_PLA(datos, label, max_iter, vini):
-    #CODIGO DEL ESTUDIANTE
-
-    return ?
-
-#CODIGO DEL ESTUDIANTE
-
-# Random initializations
-iterations = []
-for i in range(0,10):
-    #CODIGO DEL ESTUDIANTE
-
-print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-# Ahora con los datos del ejercicio 1.2.b
-
-#CODIGO DEL ESTUDIANTE
+plot_datos_cuad(puntos_2d, etiquetas, f4)
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
-
-###############################################################################
-###############################################################################
-###############################################################################
-
-# EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
-
-def sgdRL(?):
-    #CODIGO DEL ESTUDIANTE
-
-    return w
-
-
-
-#CODIGO DEL ESTUDIANTE
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-
-# Usar la muestra de datos etiquetada para encontrar nuestra solución g y estimar Eout
-# usando para ello un número suficientemente grande de nuevas muestras (>999).
-
-
-#CODIGO DEL ESTUDIANTE
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-###############################################################################
-###############################################################################
-###############################################################################
-#BONUS: Clasificación de Dígitos
-
-
-# Funcion para leer los datos
-def readData(file_x, file_y, digits, labels):
-	# Leemos los ficheros
-	datax = np.load(file_x)
-	datay = np.load(file_y)
-	y = []
-	x = []
-	# Solo guardamos los datos cuya clase sea la digits[0] o la digits[1]
-	for i in range(0,datay.size):
-		if datay[i] == digits[0] or datay[i] == digits[1]:
-			if datay[i] == digits[0]:
-				y.append(labels[0])
-			else:
-				y.append(labels[1])
-			x.append(np.array([1, datax[i][0], datax[i][1]]))
-
-	x = np.array(x, np.float64)
-	y = np.array(y, np.float64)
-
-	return x, y
-
-# Lectura de los datos de entrenamiento
-x, y = readData('datos/X_train.npy', 'datos/y_train.npy', [4,8], [-1,1])
-# Lectura de los datos para el test
-x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy', [4,8], [-1,1])
-
-
-#mostramos los datos
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x[np.where(y == -1),1]), np.squeeze(x[np.where(y == -1),2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x[np.where(y == 1),1]), np.squeeze(x[np.where(y == 1),2]), 'o', color='blue', label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TRAINING)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TEST)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-#LINEAR REGRESSION FOR CLASSIFICATION
-
-#CODIGO DEL ESTUDIANTE
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-
-#POCKET ALGORITHM
-
-#CODIGO DEL ESTUDIANTE
-
-
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-#COTA SOBRE EL ERROR
-
-#CODIGO DEL ESTUDIANTE
-"""
