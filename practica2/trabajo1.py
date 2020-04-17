@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 # Fijamos la semilla
-np.random.seed(1)
+#np.random.seed(1)
 
 
 def simula_unif(N, dim, rango):
@@ -77,7 +77,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-"""
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -96,8 +96,47 @@ def f(x, y, a, b):
 
 #CODIGO DEL ESTUDIANTE
 
+intervalo_trabajo = [-50, 50]
+
+puntos_2d = simula_unif(100, 2, intervalo_trabajo)
+
+a, b = simula_recta(intervalo_trabajo)
+
+etiquetas = []
+posibles_etiquetas = (1, -1)
+colores = {1: 'b', -1: 'r'}
+
+for punto in puntos_2d:
+	etiquetas.append(f(punto[0], punto[1], a, b))
+
+
+plt.scatter(puntos_2d[:, 0], puntos_2d[:, 1], c="b")
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+
+plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+
+	plt.scatter(puntos_2d[indice, 0], puntos_2d[indice, 1], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+# y = a*x + b
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
+
+
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+"""
 
 # 1.2.b. Dibujar una gráfica donde los puntos muestren el resultado de su etiqueta, junto con la recta usada para ello
 # Array con 10% de indices aleatorios para introducir ruido
