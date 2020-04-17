@@ -131,19 +131,72 @@ plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] 
 
 plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
 plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
-"""
 
 # 1.2.b. Dibujar una gráfica donde los puntos muestren el resultado de su etiqueta, junto con la recta usada para ello
 # Array con 10% de indices aleatorios para introducir ruido
 
 #CODIGO DEL ESTUDIANTE
 
+# no podemos usar el for, tenemos que sacarlos a la vez
+# si hacemos primero unos, al meter el ruido en el positivo, pasan a ser negativo,
+# y se les podría llegar a meter ruido otra vez al hacer el ruido del negativo
+indices_positivos = np.where(np.array(etiquetas) == 1)
+indices_positivos = indices_positivos[0]
+
+indices_negativos = np.where(np.array(etiquetas) == -1)
+indices_negativos = indices_negativos[0]
+
+
+# aplicamos el ruido a los positivos
+num_a_aplicar = len(indices_positivos) * 0.1
+num_a_aplicar = int(round(num_a_aplicar))
+indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
+
+for i in indices:
+	etiquetas[i] = -etiquetas[i]
+
+# aplicamos el ruido a los negativos
+num_a_aplicar = len(indices_negativos) * 0.1
+num_a_aplicar = int(round(num_a_aplicar))
+indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
+
+for i in indices:
+	etiquetas[i] = -etiquetas[i]
+
+# volvemos a dibujar
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+
+	plt.scatter(puntos_2d[indice, 0], puntos_2d[indice, 1], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+# y = a*x + b
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
+
+
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {},\n etiquetados segun una recta con ruido (10% de los positivos y 10% de los negativos con ruido)".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
+plt.show()
+
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
+
+
+"""
 
 ###############################################################################
 ###############################################################################
