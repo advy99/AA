@@ -5,9 +5,6 @@ Nombre Estudiante: Antonio David Villegas Yeguas
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import Add
-from sympy.solvers import solve
-from sympy import Symbol
 
 
 # Fijamos la semilla
@@ -46,7 +43,7 @@ def signo(x):
 def f(x, y, a, b):
 	return signo(y - a*x - b)
 
-
+"""
 def ajusta_PLA(datos, label, max_iter, vini):
     #CODIGO DEL ESTUDIANTE
 	w = np.copy(vini)
@@ -166,7 +163,7 @@ for i in indices:
 
 w_0 = np.zeros(3)
 
-# no queremos tener limite de iteraciones, las ponemos a infinito
+# tenemos ruido, si no poneos límite cicla infinito
 w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, 10000, w_0)
 
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta con la que etiquetamos')
@@ -209,27 +206,107 @@ for i in range(0,10):
 	iterations.append(iteraciones)
     #CODIGO DEL ESTUDIANTE
 
-print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+print('Valor medio de iteraciones necesario para converger (no converge, es el máximo de iteraciones): {}'.format(np.mean(np.asarray(iterations))))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
 """
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
 
 # EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
-def sgdRL(?):
-    #CODIGO DEL ESTUDIANTE
 
-    return w
+def grad(x, y, w):
 
+	valores = y.dot(x)/(1+np.e**(y.dot(w.T.dot(x))))
+
+	error = - 1/x.shape[1] * np.mean(valores)
+
+	return error
+
+
+def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
+    #
+	# diapositiva 17, jussto antes del metodo de newton
+
+	# el tamaño de w será dependiendo del numero de elementos de x
+	w = np.zeros((x.shape[1], 1), np.float64)
+	w_ant = w
+
+	nueva_epoca = False
+	acabar = False
+
+	iterations = 0
+
+	indice_actual = 0
+
+	indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
+
+	# en este caso solo tenemos de condicion las iteraciones
+	while not acabar:
+
+		if nueva_epoca:
+			nueva_epoca = False
+			dist = np.linalg.norm(w_ant - w)
+			if dist < error_permitido:
+				acabar = True
+			w_ant = w
+			indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
+
+		if not acabar:
+			if indice_actual+tam_batch < x.shape[0]:
+				minibatch = indices_minibatch[indice_actual:indice_actual+tam_batch]
+			else:
+				minibatch = indices_minibatch[indice_actual:x.shape[0]]
+				nueva_epoca = True
+
+			w = w - tasa_aprendizaje * gradiente(x[minibatch], y[minibatch], w)
+			iterations += 1
+
+
+	return w, iterations
 
 
 #CODIGO DEL ESTUDIANTE
+
+intervalo_trabajo = [0, 2]
+
+x = simula_unif(100, 2, intervalo_trabajo)
+
+a, b = simula_recta(intervalo_trabajo)
+
+etiquetas = []
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'b', -1: 'r'}
+
+for punto in x:
+	etiquetas.append(f(punto[0], punto[1], a, b))
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+
+	plt.scatter(x[indice, 0], x[indice, 1], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+# y = a*x + b
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
+
+
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
+plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -243,80 +320,3 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
-
-
-###############################################################################
-###############################################################################
-###############################################################################
-#BONUS: Clasificación de Dígitos
-
-
-# Funcion para leer los datos
-def readData(file_x, file_y, digits, labels):
-	# Leemos los ficheros
-	datax = np.load(file_x)
-	datay = np.load(file_y)
-	y = []
-	x = []
-	# Solo guardamos los datos cuya clase sea la digits[0] o la digits[1]
-	for i in range(0,datay.size):
-		if datay[i] == digits[0] or datay[i] == digits[1]:
-			if datay[i] == digits[0]:
-				y.append(labels[0])
-			else:
-				y.append(labels[1])
-			x.append(np.array([1, datax[i][0], datax[i][1]]))
-
-	x = np.array(x, np.float64)
-	y = np.array(y, np.float64)
-
-	return x, y
-
-# Lectura de los datos de entrenamiento
-x, y = readData('datos/X_train.npy', 'datos/y_train.npy', [4,8], [-1,1])
-# Lectura de los datos para el test
-x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy', [4,8], [-1,1])
-
-
-#mostramos los datos
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x[np.where(y == -1),1]), np.squeeze(x[np.where(y == -1),2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x[np.where(y == 1),1]), np.squeeze(x[np.where(y == 1),2]), 'o', color='blue', label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TRAINING)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-fig, ax = plt.subplots()
-ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
-ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TEST)')
-ax.set_xlim((0, 1))
-plt.legend()
-plt.show()
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-#LINEAR REGRESSION FOR CLASSIFICATION
-
-#CODIGO DEL ESTUDIANTE
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-
-#POCKET ALGORITHM
-
-#CODIGO DEL ESTUDIANTE
-
-
-
-
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-#COTA SOBRE EL ERROR
-
-#CODIGO DEL ESTUDIANTE
-"""
