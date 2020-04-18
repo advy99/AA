@@ -5,9 +5,6 @@ Nombre Estudiante: Antonio David Villegas Yeguas
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import Add
-from sympy.solvers import solve
-from sympy import Symbol
 
 
 # Fijamos la semilla
