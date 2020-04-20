@@ -43,7 +43,7 @@ def signo(x):
 def f(x, y, a, b):
 	return signo(y - a*x - b)
 
-"""
+
 def ajusta_PLA(datos, label, max_iter, vini):
     #CODIGO DEL ESTUDIANTE
 	w = np.copy(vini)
@@ -211,7 +211,6 @@ print('Valor medio de iteraciones necesario para converger (no converge, es el m
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-"""
 
 ###############################################################################
 ###############################################################################
@@ -219,6 +218,18 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
+def error_erm(x, y, w):
+
+	num_elementos = x.shape[1]
+
+	error = np.float64(0.0)
+
+	for i in range(num_elementos):
+		error += np.log(1 + np.e**(-y[i]*w.T.dot(x[i])))
+
+	error = error/num_elementos
+
+	return error
 
 def grad(x, y, w):
 
@@ -226,7 +237,7 @@ def grad(x, y, w):
 
 
 
-def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
+def sgdRL(x, y, tasa_aprendizaje, error_permitido = 0.01):
     #
 	# diapositiva 17, jussto antes del metodo de newton
 
@@ -234,41 +245,31 @@ def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
 	w = np.zeros((x.shape[1],), np.float64)
 	w_ant = w.copy()
 
-	nueva_epoca = False
 	acabar = False
 
-	iterations = 0
+	epocas = 0
 
-	indice_actual = 0
-
-	indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
 
 	# en este caso solo tenemos de condicion las iteraciones
 	while not acabar:
 
-		if nueva_epoca:
-			nueva_epoca = False
-			dist = np.linalg.norm(w_ant - w)
-			if dist < error_permitido:
-				acabar = True
-			w_ant = w.copy()
-			indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
+		# aplicamos una permutacion aleatoria a los indices del minibatch
+		indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
 
-		if not acabar:
-			if indice_actual+tam_batch < x.shape[0]:
-				minibatch = indices_minibatch[indice_actual:indice_actual+tam_batch]
-				indice_actual += tam_batch
-			else:
-				minibatch = indices_minibatch[indice_actual:x.shape[0]]
-				indice_actual = 0
-				nueva_epoca = True
+		# tamaños de minibatch = 1
+		for i in indices_minibatch:
+			w = w - tasa_aprendizaje * grad(x[i], y[i], w)
 
-			for i in minibatch:
-				w = w - tasa_aprendizaje * gradiente(x[i], y[i], w)
-			iterations += 1
+		epocas += 1
+		dist = np.linalg.norm(w_ant - w)
+
+		if dist < error_permitido:
+			acabar = True
+
+		w_ant = w.copy()
 
 
-	return w, iterations
+	return w, epocas
 
 
 #CODIGO DEL ESTUDIANTE
@@ -277,7 +278,17 @@ intervalo_trabajo = [0, 2]
 
 x = simula_unif(100, 2, intervalo_trabajo)
 
-a, b = simula_recta(intervalo_trabajo)
+
+# escogemos dos puntos y hacemos que la recta pase por estos
+puntos_recta = np.random.choice(x.shape[0], 2, replace=False)
+
+# ecuacio nde una recta: m = y_2 - y_1 / x_2 - x_1
+
+a = (x[puntos_recta[1]][1] - x[puntos_recta[0]][1]) / (x[puntos_recta[1]][0] - x[puntos_recta[0]][0])
+
+# y = ax + b
+
+b = x[puntos_recta[0]][1] - (a*x[puntos_recta[0]][0])
 
 etiquetas = []
 
@@ -314,7 +325,7 @@ etiquetas = np.array(etiquetas)
 x = np.c_[np.ones((x.shape[0], 1), dtype=np.float64), x]
 
 
-w, iteraciones = sgdRL(x, etiquetas, 0.01, 64, grad)
+w, epocas = sgdRL(x, etiquetas, 0.01, 0.01)
 
 
 posibles_etiquetas = (1, -1)
@@ -342,7 +353,11 @@ plt.ylabel("Valor y de los puntos obtenidos")
 
 plt.show()
 
-print("W obtenida: " + str(w) + "\n Iteraciones: " + str(iteraciones))
+
+
+print("W obtenida: " + str(w) + "\n Épocas: " + str(iteraciones))
+print("Error obtenido dentro de la muestra (Ein): " + str(error_erm(x, etiquetas, w)))
+
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -353,6 +368,50 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 #CODIGO DEL ESTUDIANTE
+x_test = simula_unif(1000, 2, intervalo_trabajo)
+
+etiquetas = []
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'b', -1: 'r'}
+
+for punto in x_test:
+	etiquetas.append(f(punto[0], punto[1], a, b))
+
+
+etiquetas = np.array(etiquetas)
+x_test = np.c_[np.ones((x_test.shape[0], 1), dtype=np.float64), x_test]
+
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'b', -1: 'r'}
+
+plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con sgdRL')
+
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
+
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+	# ahora no es 0 y 1, si no 1 y 2, porque le he metido un primer 1 para usar w en el perceptron
+	plt.scatter(x_test[indice, 1], x_test[indice, 2], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+plt.title("Nube de 1000 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
+plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+print("Error obtenido fuera de la muestra (Eout): " + str(error_erm(x_test, etiquetas, w)))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
