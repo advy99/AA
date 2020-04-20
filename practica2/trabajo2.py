@@ -222,11 +222,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 def grad(x, y, w):
 
-	valores = y.dot(x)/(1+np.e**(y.dot(w.T.dot(x))))
+	return -(y * x)/(1 + np.exp(y * w.T.dot(x)))
 
-	error = - 1/x.shape[1] * np.mean(valores)
-
-	return error
 
 
 def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
@@ -234,8 +231,8 @@ def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
 	# diapositiva 17, jussto antes del metodo de newton
 
 	# el tamaño de w será dependiendo del numero de elementos de x
-	w = np.zeros((x.shape[1], 1), np.float64)
-	w_ant = w
+	w = np.zeros((x.shape[1],), np.float64)
+	w_ant = w.copy()
 
 	nueva_epoca = False
 	acabar = False
@@ -254,17 +251,20 @@ def sgdRL(x, y, tasa_aprendizaje, tam_batch, gradiente, error_permitido = 0.01):
 			dist = np.linalg.norm(w_ant - w)
 			if dist < error_permitido:
 				acabar = True
-			w_ant = w
+			w_ant = w.copy()
 			indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
 
 		if not acabar:
 			if indice_actual+tam_batch < x.shape[0]:
 				minibatch = indices_minibatch[indice_actual:indice_actual+tam_batch]
+				indice_actual += tam_batch
 			else:
 				minibatch = indices_minibatch[indice_actual:x.shape[0]]
+				indice_actual = 0
 				nueva_epoca = True
 
-			w = w - tasa_aprendizaje * gradiente(x[minibatch], y[minibatch], w)
+			for i in minibatch:
+				w = w - tasa_aprendizaje * gradiente(x[i], y[i], w)
 			iterations += 1
 
 
@@ -307,6 +307,42 @@ plt.xlabel("Valor x de los puntos obtenidos")
 plt.ylabel("Valor y de los puntos obtenidos")
 
 plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+etiquetas = np.array(etiquetas)
+x = np.c_[np.ones((x.shape[0], 1), dtype=np.float64), x]
+
+
+w, iteraciones = sgdRL(x, etiquetas, 0.01, 64, grad)
+
+
+posibles_etiquetas = (1, -1)
+colores = {1: 'b', -1: 'r'}
+
+plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con sgdRL')
+
+
+plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
+
+
+for etiqueta in posibles_etiquetas:
+	indice = np.where(np.array(etiquetas) == etiqueta)
+	# ahora no es 0 y 1, si no 1 y 2, porque le he metido un primer 1 para usar w en el perceptron
+	plt.scatter(x[indice, 1], x[indice, 2], c=colores[etiqueta], label="{}".format(etiqueta))
+
+
+
+plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}, etiquetados segun una recta".format(intervalo_trabajo[0], intervalo_trabajo[1]))
+plt.legend()
+plt.xlim(intervalo_trabajo)
+plt.ylim(intervalo_trabajo)
+plt.xlabel("Valor x de los puntos obtenidos")
+plt.ylabel("Valor y de los puntos obtenidos")
+
+plt.show()
+
+print("W obtenida: " + str(w) + "\n Iteraciones: " + str(iteraciones))
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
