@@ -127,7 +127,7 @@ for i in range(0,10):
 	iterations.append(iteraciones)
     #CODIGO DEL ESTUDIANTE
 
-print('Valor medio de iteraciones necesario para converger: {}'.format(np.mean(np.asarray(iterations))))
+print('Valor medio de iteraciones necesario para converger con 10 w_0 aleatorios entre [0, 1]: {}'.format(np.mean(np.asarray(iterations))))
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
