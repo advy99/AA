@@ -6,6 +6,9 @@ Nombre Estudiante: Antonio David Villegas Yeguas
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.random.seed(0)
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -177,7 +180,7 @@ plt.legend()
 plt.show()
 
 print("Error obtenido usando sgd dentro de la muestra (Ein): ", Err(x, y, w).mean())
-print("Error obtenido usando sgd fuera de la muestra (Eout): ", Err(x_test, y_test, w).mean())
+print("Error obtenido usando sgd para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -199,14 +202,21 @@ plt.ylim([-7, 0])
 plt.legend()
 plt.show()
 
-print("Error obtenido usando sgd dentro de la muestra (Ein): ", Err(x, y, w).mean())
-print("Error obtenido usando sgd fuera de la muestra (Eout): ", Err(x_test, y_test, w).mean())
+print("Error obtenido usando pseudoinverse dentro de la muestra (Ein): ", Err(x, y, w).mean())
+print("Error obtenido usando pseudoinverse para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
 def simula_unif(N, dim, rango):
 	return np.random.uniform(rango[0],rango[1],(N,dim))
+
+
+def signo(x):
+	if x >= 0:
+		return 1
+	return -1
+
 
 
 def ajusta_PLA(datos, label, max_iter, vini):
@@ -234,22 +244,46 @@ def ajusta_PLA(datos, label, max_iter, vini):
 def pocket(x, y, iteraciones):
 
 	# en el ej 2 nos daba mejores resultados si el comienzo lo haciamos aleatorio entre [0, 1]
-	w_0 = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	w_mejor = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	ein_w_mejor = Err(x, y, w_mejor).mean()
 
-	w = w_0
+	w = w_mejor.copy()
 
 	it = 0
 
 	while it < iteraciones:
-
+		w, basura = ajusta_PLA(x, y, 1, w)
+		ein_w = Err(x, y, w).mean()
+		if ein_w < ein_w_mejor:
+			w_mejor = w.copy()
+			ein_w_mejor = ein_w
 
 		it += 1
 
-	return w
+	return w_mejor
 
 #CODIGO DEL ESTUDIANTE
 
+w = pocket(x, y, 20000)
 
+fig, ax = plt.subplots()
+
+ax.plot()
+ax.plot(np.squeeze(x[np.where(y == -1),1]), np.squeeze(x[np.where(y == -1),2]), 'o', color='red', label='4')
+ax.plot(np.squeeze(x[np.where(y == 1),1]), np.squeeze(x[np.where(y == 1),2]), 'o', color='blue', label='8')
+ax.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con pocket')
+ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TRAINING)')
+ax.set_xlim((0, 1))
+plt.xlim(intervalo_trabajo)
+plt.ylim([-7, 0])
+plt.legend()
+plt.show()
+
+print("Error obtenido usando pocket dentro de la muestra (Ein): ", Err(x, y, w).mean())
+print("Error obtenido usando pocket para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
