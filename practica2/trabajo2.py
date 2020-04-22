@@ -50,9 +50,11 @@ def ajusta_PLA(datos, label, max_iter, vini):
 	mejora = True
 	iteraciones = 0
 
+	# mientras tengamos mejora y estemos por debajo del límite de iteraciones
 	while mejora and iteraciones < max_iter:
 		mejora = False
 
+		# cada elemento de datos, lo evaluamos y modificamos w si acertamos con la predicción
 		for i in range(0, len(datos)):
 			valor = signo(w.T.dot(datos[i]))
 
@@ -125,7 +127,6 @@ for i in range(0,10):
 	w_0 = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
 	w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, np.Inf, w_0)
 	iterations.append(iteraciones)
-    #CODIGO DEL ESTUDIANTE
 
 print('Valor medio de iteraciones necesario para converger con 10 w_0 aleatorios entre [0, 1]: {}'.format(np.mean(np.asarray(iterations))))
 
