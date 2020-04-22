@@ -417,6 +417,8 @@ En este ejercicio implementaremos dos métodos lineales, el algoritmo Perceptron
 
 El algoritmo Perceptron se basa en actualizar el vector de pesos w dependiendo del signo de los datos, de forma que el vector de pesos se vaya modificando hasta que tenga todos los datos correctamente clasificados, lo que hace que nos encuentre un óptimo en tiempo finito, aunque como hemos comentado en el primer ejercicio, el ruido hará que este algoritmo no funcione correctamente, como veremos más adelante.
 
+Cabe recordar que el algoritmo Perceptron no tiene ningún tipo de memoria, es decir, no almacena información de iteraciones anteriores por lo que si pasamos de un buen ajuste a uno peor, no podemos asegurar que vuelva a pasar por este. Este hecho permite que el algoritmo cicle, como he comentado antes.
+
 \begin{lstlisting}
 # algoritmo Perceptron
 def ajusta_PLA(datos, label, max_iter, vini):
@@ -682,7 +684,295 @@ Error obtenido fuera de la muestra (Eout): 0.07828587637844557
 
 Vemos como el error es mayor, pero sigue siendo bastante más bajo.
 
+
+
 \section{Ejercicio bonus: Clasificación de Dígitos}
+
+Para este ejercicio volvemos a usar los datos de intensidad promedio y de simetría en clasificación de números, pero en lugar de clasificar los números 1 y 5 usaremos los datos de los números 4 y 8.
+
+\subsection{Planteamiento del problema}
+
+En nuestro caso, queremos clasificar un conjunto de números escritos a manos. En concreto, para que el problema sea binario clasificaremos dos números, el 4 y el 8, en los que intentaremos aprender una función  $g$.
+
+Para esto usaremos un conjunto de entrenamiento y otro conjunto de test e intentaremos conseguir un ajuste usando modelos de Regresión Lineal y aplicando el algoritmo PLA-Pocket como mejora, viendo como esto puede ser una mejora sustancial para métodos que se comportaban bien, sin embargo esto hará que se comporten aún mejor ya que como veremos existe mucho más ruido, lo que dificulta el hacer un buen ajuste como hemos visto.
+
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{datos_bonus.png}
+ 		 \caption{Datos de los dígitos 4 y 8 (conjunto de entrenamiento)}
+  		\label{fig:bonus_entrenamiento}
+
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{datos_bonus_test.png}
+ 		 \caption{Datos de los dígitos 4 y 8 (conjunto de test)}
+  		\label{fig:bonus_test}
+
+\end{figure}
+
+\subsection{Implementación del problema usando SGD}
+
+Para resolver este problema, primero tenemos que implementar el Gradiente Descendente Estocástico, ya que será el modelo de Regresión Lineal que usaremos. El algoritmo será el mismo que en la práctica anterior, pero con una pequeña modificación, ya que en la práctica anterior implemente una versión distinta al SGD vista en teoría y dicha versión no comprobaba que aprenda al menos una vez de cada dato, mientras que esta versión si:
+
+\begin{lstlisting}
+# Funcion para calcular el error
+def Err(x,y,w):
+	## Función dada en las diapositivas:
+	#
+	# E_in(w) = 1/N * SUM(w^T * x_n - y_n)^2
+	#
+	# basicamente, hacemos w * x - y al cuadrado, y le hacemos la media
+
+	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.square.html
+	# cambiamos la forma de y, ya que como vemos en las diapositivas, y tiene una columna
+	# y muchas filas, pero aqui tenemos una fila y muchas columnas
+	err = np.square(x.dot(w) - y.reshape(-1,1))
+
+	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html
+	err.mean()
+
+	return err
+
+def dErr(x, y, w):
+	#derivada como hemos visto en teoria
+	# la parte interna sigue igual
+	derivada = x.dot(w) - y.reshape(-1,1)
+
+	# el cuadrado pasa a ser un *2, y restamos una al exponente
+	derivada = 2 * np.mean(x * derivada, axis=0)
+
+	derivada = derivada.reshape(-1, 1)
+
+	return derivada
+
+
+def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 4000):
+    #
+	# diapositiva 17, jussto antes del metodo de newton
+
+	# el tamaño de w será dependiendo del numero de elementos de x
+	w = np.zeros((x.shape[1], 1), np.float64)
+
+	iterations = 0
+
+	nueva_epoca = False
+	indice_actual = 0
+
+	indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
+
+	# en este caso solo tenemos de condicion las iteraciones
+	while iterations < maxIteraciones:
+
+		iterations = iterations + 1
+
+		if nueva_epoca:
+			nueva_epoca = False
+			indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
+
+		if indice_actual+tam_batch < x.shape[0]:
+			minibatch = indices_minibatch[indice_actual:indice_actual+tam_batch]
+			indice_actual += tam_batch
+		else:
+			minibatch = indices_minibatch[indice_actual:x.shape[0]]
+			indice_actual = 0
+			nueva_epoca = True
+
+
+		w = w - tasa_aprendizaje * dErr(x[minibatch], y[minibatch], w)
+		iterations += 1
+
+
+
+	return w, iterations
+\end{lstlisting}
+
+Vemos como en este algoritmo, ya si se tiene en cuenta que se aprenda de todos los elementos al menos una vez, aunque se recorren de forma aleatoria.
+
+\subsubsection{Ejecución del algoritmo}
+
+Este algoritmo nos da el siguiente ajuste en $E_{in}$:
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{bonus_sgd.png}
+ 		 \caption{Ajuste obtenido con SGD en $E_{in}$}
+  		\label{fig:ej2-SGR-RL}
+
+\end{figure}
+
+Lo cual nos da el siguiente error:
+
+\begin{lstlisting}
+Error obtenido usando sgd dentro de la muestra (Ein):  0.7694165537758165
+\end{lstlisting}
+
+
+Y el siguiente ajuste en $E_{test}$:
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{bonus_sgd-test.png}
+ 		 \caption{Ajuste obtenido con SGD en $E_{test}$}
+  		\label{fig:ej2-SGR-RL}
+
+\end{figure}
+
+Lo cual nos da el siguiente error:
+
+\begin{lstlisting}
+Error obtenido usando sgd para los datos de test (Etest):  0.8175413200852162
+\end{lstlisting}
+
+Vemos como el error es bastante alto debido al ruido que presentan los datos. Intentaremos mejorar el ajuste aplicando el algoritmo PLA-Pocket que explicaré a continuación.
+
+\newpage
+
+\subsection{Implementación del algoritmo usando PLA-Pocket}
+
+El algoritmo se basa en ejecutar el algoritmo Perceptron, implementado y usado en el segundo ejercicio de esta práctica, pero almacenando el mejor valor que ha tenido hasta el momento, ya que como sabemos el algoritmo Perceptron no tiene ningún tipo de memoria. por lo que no almacena datos sobre iteraciones anteriores.
+
+
+\begin{lstlisting}
+def signo(x):
+	if x >= 0:
+		return 1
+	return -1
+
+
+def num_errores_puntos(x, y, w):
+
+	errores = 0
+	for i in range(len(x)):
+		if signo(w.T.dot(x[i])) != y[i]:
+			errores += 1
+
+	errores = errores/len(x)
+
+	return errores
+
+def simula_unif(N, dim, rango):
+	return np.random.uniform(rango[0],rango[1],(N,dim))
+
+
+def ajusta_PLA(datos, label, max_iter, vini):
+    #CODIGO DEL ESTUDIANTE
+	w = np.copy(vini)
+	mejora = True
+	iteraciones = 0
+
+	while mejora and iteraciones < max_iter:
+		mejora = False
+
+		for i in range(0, len(datos)):
+			valor = signo(w.T.dot(datos[i]))
+
+			if valor != label[i]:
+				w = w + label[i] * datos[i].reshape(-1, 1)
+				mejora = True
+
+		iteraciones += 1
+
+	return w, iteraciones
+
+
+#POCKET ALGORITHM
+def pocket(x, y, iteraciones, w_ini):
+
+	# en el ej 2 nos daba mejores resultados si el comienzo lo haciamos aleatorio entre [0, 1]
+	#w_mejor = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	w_mejor = w_ini.copy()
+
+	ein_w_mejor = num_errores_puntos(x, y, w_mejor)
+	w = w_mejor.copy()
+
+	it = 0
+
+	while it < iteraciones:
+		w, basura = ajusta_PLA(x, y, 1, w.copy())
+		ein_w = num_errores_puntos(x, y, w)
+		if ein_w < ein_w_mejor:
+			w_mejor = w.copy()
+			ein_w_mejor = ein_w
+
+		it += 1
+
+	return w_mejor
+\end{lstlisting}
+
+
+Vemos como en este caso la función de error usada es un conteo de los puntos que están mal clasificados.
+
+Básicamente, ejecutamos el PLA (algoritmo Perceptron) tantas veces como iteraciones llamemos al algoritmo PLA-Pocket, he decidido que la llamada al algoritmo PLA sea de únicamente una época, ya que como hemos comentado, el principal problema del PLA es que no tiene memoria, por lo que si ejecutamos con más de una época es posible que se salte el mínimo que estamos buscando.
+
+Como nos pide el ejercicio, el vector de pesos inicial para el algoritmo Pocket será el ajuste obtenido por el algoritmo SGD, de forma que intentaremos mejorar el ajuste obtenido por SGD.
+
+Obtenemos los siguientes resultados:
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{bonus_pocket.png}
+ 		 \caption{Ajuste obtenido con PLA-Pocket en $E_{in}$}
+  		\label{fig:bonus-pla-pocket}
+
+\end{figure}
+
+\begin{lstlisting}
+Error obtenido usando pocket dentro de la muestra (Ein):  0.22445561139028475
+\end{lstlisting}
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{bonus_pocket-test.png}
+ 		 \caption{Ajuste obtenido con PLA-Pocket en $E_{test}$}
+  		\label{fig:bonus-pla-pocket}
+
+\end{figure}
+
+
+\begin{lstlisting}
+Error obtenido usando pocket para los datos de test (Etest):  0.2568306010928962
+\end{lstlisting}
+
+
+Vemos como hemos reducido en gran cantidad el error, y el error obtenido es principalmente por el ruido.
+
+
+\subsection{Calculo de la cota del error fuera de la muestra}
+
+Vamos a calcular una cota sobre el verdadero valor de $E_{out}$. Para esto usaremos lo aprendido en teoría:
+
+$$ E_{out}(h) \leq E_{in}(h) + \sqrt{\frac{1}{2*N}*log\frac{2}{\delta}} $$
+
+Podemos calcular dos cotas del error, usando $E_{in}$ o usando $E_{out}$. Como se nos pide en el ejercicio, usaremos $\delta = 0,05$
+
+\subsubsection{Calculo de la cota usando el error en la muestra}
+
+$$ E_{out}(h) \leq E_{in}(h) + \sqrt{\frac{1}{2*N}*log\frac{2}{\delta}} $$
+
+Obtenemos la siguiente cota:
+
+\begin{lstlisting}
+Cota de Eout usando Ein:  0.26375900679491193
+\end{lstlisting}
+
+
+
+\subsubsection{Calculo de la cota usando el error en el test}
+
+$$ E_{out}(h) \leq E_{test}(h) + \sqrt{\frac{1}{2*N}*log\frac{2}{\delta}} $$
+
+Obtenemos la siguiente cota:
+
+\begin{lstlisting}
+Cota de Eout usando Ein:  0.29613399649752337
+\end{lstlisting}
+
+Vemos como al calcular las cotas, la cota en $E_{test}$ es mayor ya que el segundo sumando es el mismo para ambas cotas, sin embargo $E_{test}$ es mayor.
+
+\newpage
 
 \section{Referencias, material y documentación usada}
 
