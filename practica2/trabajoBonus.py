@@ -109,28 +109,6 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 4000):
 	return w, iterations
 
 
-# Pseudoinversa
-def pseudoinverse(matriz_x, vector_y):
-    #
-	# https://docs.scipy.org/doc/numpy/reference/generated/numpy.transpose.html
-	x_traspuesta = matriz_x.transpose()
-
-	# cambiamos de forma Y, no sabemos cuantas filas tendrá, pero tendrá una única columna
-	y_traspuesto = vector_y.reshape(-1, 1)
-
-	# multiplicamos x por su traspuesta https://docs.scipy.org/doc/numpy/reference/generated/numpy.dot.html
-	x_pseudoinversa = x_traspuesta.dot(matriz_x)
-
-	# calculamos la inversa: https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.inv.html
-	x_pseudoinversa = np.linalg.inv(x_pseudoinversa)
-
-	x_pseudoinversa = x_pseudoinversa.dot(x_traspuesta)
-
-	# finalmente calculamos w con la inversa e y
-	w = x_pseudoinversa.dot(y_traspuesto)
-
-	return w
-
 
 # Lectura de los datos de entrenamiento
 x, y = readData('datos/X_train.npy', 'datos/y_train.npy', [4,8], [-1,1])
@@ -184,20 +162,16 @@ plt.legend()
 plt.show()
 
 print("Error obtenido usando sgd dentro de la muestra (Ein): ", Err(x, y, w).mean())
-print("Error obtenido usando sgd para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
-intervalo_trabajo = [0, 1]
-w = pseudoinverse(x, y)
-
 fig, ax = plt.subplots()
 
 ax.plot()
-ax.plot(np.squeeze(x[np.where(y == -1),1]), np.squeeze(x[np.where(y == -1),2]), 'o', color='red', label='4')
-ax.plot(np.squeeze(x[np.where(y == 1),1]), np.squeeze(x[np.where(y == 1),2]), 'o', color='blue', label='8')
+ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
+ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
 ax.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con pseudoinverse')
 ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TRAINING)')
 ax.set_xlim((0, 1))
@@ -206,9 +180,7 @@ plt.ylim([-7, 0])
 plt.legend()
 plt.show()
 
-print("Error obtenido usando pseudoinverse dentro de la muestra (Ein): ", Err(x, y, w).mean())
-print("Error obtenido usando pseudoinverse para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
-
+print("Error obtenido usando sgd para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -298,7 +270,9 @@ plt.ylim([-7, 0])
 plt.legend()
 plt.show()
 
-print("Error obtenido usando pocket dentro de la muestra (Ein): ", num_errores_puntos(x, y, w))
+ein = num_errores_puntos(x, y, w)
+print("Error obtenido usando pocket dentro de la muestra (Ein): ", ein)
+
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -314,8 +288,8 @@ plt.ylim([-7, 0])
 plt.legend()
 plt.show()
 
-
-print("Error obtenido usando pocket para los datos de test (Etest): ", num_errores_puntos(x_test, y_test, w))
+etest = num_errores_puntos(x_test, y_test, w)
+print("Error obtenido usando pocket para los datos de test (Etest): ", etest)
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
@@ -323,4 +297,19 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 #COTA SOBRE EL ERROR
 
-#CODIGO DEL ESTUDIANTE
+delta = 0.05
+
+cota_ein = ein + np.sqrt((1/(2*len(x))) * np.log(2/delta) )
+
+print("Cota de Eout usando Ein: ", cota_ein)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+cota_etest = etest + np.sqrt((1/(2*len(x))) * np.log(2/delta) )
+
+print("Cota de Eout usando Ein: ", cota_etest)
+
+
+input("\n--- Pulsar tecla para continuar ---\n")
