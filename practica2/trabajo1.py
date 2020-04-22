@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 # Fijamos la semilla
-#np.random.seed(1)
+np.random.seed(1)
 
 
 def simula_unif(N, dim, rango):
@@ -271,13 +271,13 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
 
 #CODIGO DEL ESTUDIANTE
 
-plot_datos_cuad(puntos_2d, etiquetas, f1)
+plot_datos_cuad(puntos_2d, etiquetas, f1, "Funcion f1")
 
-plot_datos_cuad(puntos_2d, etiquetas, f2)
+plot_datos_cuad(puntos_2d, etiquetas, f2, "Funcion f2")
 
-plot_datos_cuad(puntos_2d, etiquetas, f3)
+plot_datos_cuad(puntos_2d, etiquetas, f3, "Funcion f3")
 
-plot_datos_cuad(puntos_2d, etiquetas, f4)
+plot_datos_cuad(puntos_2d, etiquetas, f4, "Funcion f4")
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
