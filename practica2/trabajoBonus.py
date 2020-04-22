@@ -283,8 +283,7 @@ def pocket(x, y, iteraciones, w_ini):
 #CODIGO DEL ESTUDIANTE
 #w, iteraciones = sgd(x, y, tasa_aprendizaje, 32, 10000)
 
-print("Esto va a tardar un poco, python hace lo que puede (o eso dice, porque no me creo que este lenguaje este sobre C)")
-w = pocket(x, y, 10000, w.copy())
+w = pocket(x, y, 200, w.copy())
 
 fig, ax = plt.subplots()
 
