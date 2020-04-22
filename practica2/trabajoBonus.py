@@ -147,6 +147,9 @@ ax.set_xlim((0, 1))
 plt.legend()
 plt.show()
 
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
 fig, ax = plt.subplots()
 ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
 ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
@@ -156,6 +159,7 @@ plt.legend()
 plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
 
 #LINEAR REGRESSION FOR CLASSIFICATION
 
@@ -208,14 +212,27 @@ print("Error obtenido usando pseudoinverse para los datos de test (Etest): ", Er
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-def simula_unif(N, dim, rango):
-	return np.random.uniform(rango[0],rango[1],(N,dim))
-
-
 def signo(x):
 	if x >= 0:
 		return 1
 	return -1
+
+
+def num_errores_puntos(x, y, w):
+
+	errores = 0
+	for i in range(len(x)):
+		if signo(w.T.dot(x[i])) != y[i]:
+			errores += 1
+
+	errores = errores/len(x)
+
+	return errores
+
+def simula_unif(N, dim, rango):
+	return np.random.uniform(rango[0],rango[1],(N,dim))
+
+
 
 
 
@@ -232,7 +249,7 @@ def ajusta_PLA(datos, label, max_iter, vini):
 			valor = signo(w.T.dot(datos[i]))
 
 			if valor != label[i]:
-				w = w + label[i] * datos[i]
+				w = w + label[i] * datos[i].reshape(-1, 1)
 				mejora = True
 
 		iteraciones += 1
@@ -241,19 +258,20 @@ def ajusta_PLA(datos, label, max_iter, vini):
 
 
 #POCKET ALGORITHM
-def pocket(x, y, iteraciones):
+def pocket(x, y, iteraciones, w_ini):
 
 	# en el ej 2 nos daba mejores resultados si el comienzo lo haciamos aleatorio entre [0, 1]
-	w_mejor = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
-	ein_w_mejor = Err(x, y, w_mejor).mean()
+	#w_mejor = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	w_mejor = w_ini.copy()
 
+	ein_w_mejor = num_errores_puntos(x, y, w_mejor)
 	w = w_mejor.copy()
 
 	it = 0
 
 	while it < iteraciones:
-		w, basura = ajusta_PLA(x, y, 1, w)
-		ein_w = Err(x, y, w).mean()
+		w, basura = ajusta_PLA(x, y, 1, w.copy())
+		ein_w = num_errores_puntos(x, y, w)
 		if ein_w < ein_w_mejor:
 			w_mejor = w.copy()
 			ein_w_mejor = ein_w
@@ -263,8 +281,10 @@ def pocket(x, y, iteraciones):
 	return w_mejor
 
 #CODIGO DEL ESTUDIANTE
+#w, iteraciones = sgd(x, y, tasa_aprendizaje, 32, 10000)
 
-w = pocket(x, y, 20000)
+print("Esto va a tardar un poco, python hace lo que puede (o eso dice, porque no me creo que este lenguaje este sobre C)")
+w = pocket(x, y, 10000, w.copy())
 
 fig, ax = plt.subplots()
 
@@ -279,11 +299,24 @@ plt.ylim([-7, 0])
 plt.legend()
 plt.show()
 
-print("Error obtenido usando pocket dentro de la muestra (Ein): ", Err(x, y, w).mean())
-print("Error obtenido usando pocket para los datos de test (Etest): ", Err(x_test, y_test, w).mean())
-
+print("Error obtenido usando pocket dentro de la muestra (Ein): ", num_errores_puntos(x, y, w))
 
 input("\n--- Pulsar tecla para continuar ---\n")
+
+
+fig, ax = plt.subplots()
+ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
+ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
+ax.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con pocket')
+ax.set(xlabel='Intensidad promedio', ylabel='Simetria', title='Digitos Manuscritos (TEST)')
+ax.set_xlim((0, 1))
+plt.xlim(intervalo_trabajo)
+plt.ylim([-7, 0])
+plt.legend()
+plt.show()
+
+
+print("Error obtenido usando pocket para los datos de test (Etest): ", num_errores_puntos(x_test, y_test, w))
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
