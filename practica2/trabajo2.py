@@ -68,6 +68,7 @@ def ajusta_PLA(datos, label, max_iter, vini):
 
 #CODIGO DEL ESTUDIANTE
 
+# obtenemos los puntos y la recta y los dibujamos
 intervalo_trabajo = [-50, 50]
 
 puntos_2d = simula_unif(100, 2, intervalo_trabajo)
@@ -88,19 +89,16 @@ for etiqueta in posibles_etiquetas:
 
 
 
-# le metemos unos al principio para que concuerde
+# le metemos unos al principio para que concuerde con w
 puntos_2d = np.c_[np.ones((puntos_2d.shape[0], 1), dtype=np.float64), puntos_2d]
 
 w_0 = np.zeros(3)
 
+# aplicamos el algoritmo perceptron y pintamos el ajuste en el grafico
 # no queremos tener limite de iteraciones, las ponemos a infinito
 w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, np.Inf, w_0)
 
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta con la que etiquetamos')
-
-# obtenemos 0 = w_0 + w_1 * x1 + w_2 * x_2
-
-# x_2 = (-w_0 - w_1 * x_1 )/ w_2
 
 
 plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con PLA')
@@ -121,7 +119,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
-# Random initializations
+# Random initializations, hacemos 10 veces el ajuste y hacemos la media de iteraciones
 iterations = []
 for i in range(0,10):
 	w_0 = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
@@ -138,6 +136,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 plt.clf()
 
+# ahora le aplicamos el ruido, como nos pide el ejerccio, como lo hicimos en el ejercicio 1
 indices_positivos = np.where(np.array(etiquetas) == 1)
 indices_positivos = indices_positivos[0]
 
@@ -164,14 +163,10 @@ for i in indices:
 
 w_0 = np.zeros(3)
 
-# tenemos ruido, si no poneos límite cicla infinito
+# tenemos ruido, si no poneos límite cicla infinito, como explicamos en el PDF
 w, iteraciones = ajusta_PLA(puntos_2d, etiquetas, 10000, w_0)
 
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta con la que etiquetamos')
-
-# obtenemos 0 = w_0 + w_1 * x1 + w_2 * x_2
-
-# x_2 = (-w_0 - w_1 * x_1 )/ w_2
 
 
 plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con PLA')
@@ -219,6 +214,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 3: REGRESIÓN LOGÍSTICA CON STOCHASTIC GRADIENT DESCENT
 
+#usamos la formula de Ein que nos sugiere en tería al usar Empirical Risk Minimization
 def error_erm(x, y, w):
 
 	num_elementos = x.shape[1]
@@ -237,7 +233,7 @@ def grad(x, y, w):
 	return -(y * x)/(1 + np.exp(y * w.T.dot(x)))
 
 
-
+# regresion logistica con gradiente descendente estocastico
 def sgdRL(x, y, tasa_aprendizaje, error_permitido = 0.01):
     #
 	# diapositiva 17, jussto antes del metodo de newton
@@ -262,6 +258,7 @@ def sgdRL(x, y, tasa_aprendizaje, error_permitido = 0.01):
 			w = w - tasa_aprendizaje * grad(x[i], y[i], w)
 
 		epocas += 1
+		# comprobamos la condicion de parada
 		dist = np.linalg.norm(w_ant - w)
 
 		if dist < error_permitido:
@@ -275,6 +272,7 @@ def sgdRL(x, y, tasa_aprendizaje, error_permitido = 0.01):
 
 #CODIGO DEL ESTUDIANTE
 
+# obtenemos los puntos
 intervalo_trabajo = [0, 2]
 
 x = simula_unif(100, 2, intervalo_trabajo)
@@ -328,13 +326,14 @@ x = np.c_[np.ones((x.shape[0], 1), dtype=np.float64), x]
 
 w, epocas = sgdRL(x, etiquetas, 0.01, 0.01)
 
-
+# dibujamos al igual que en otros ejercicios (es exactamente el mismo código)
 posibles_etiquetas = (1, -1)
 colores = {1: 'b', -1: 'r'}
 
+# dibujamos la recta obtenida con el ajuste
 plt.plot(intervalo_trabajo, [ (-w[0]-w[1]*intervalo_trabajo[0])/w[2], (-w[0]-w[1]*intervalo_trabajo[1])/w[2]], 'y-', label='Recta obtenida con sgdRL')
 
-
+# dibujamos la recta real de etiquetado
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
 
 
@@ -368,7 +367,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 # usando para ello un número suficientemente grande de nuevas muestras (>999).
 
 
-#CODIGO DEL ESTUDIANTE
+# igual que antes, solo que con un conjunto de 1000 puntos como test
 x_test = simula_unif(1000, 2, intervalo_trabajo)
 
 etiquetas = []
