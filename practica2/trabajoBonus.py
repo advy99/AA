@@ -78,6 +78,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 4000):
 
 	iterations = 0
 
+	# tenemos en cuenta epocas, no como en la P1 que no tenia en cuenta el pasar por todos los indices
 	nueva_epoca = False
 	indice_actual = 0
 
@@ -88,10 +89,13 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 4000):
 
 		iterations = iterations + 1
 
+		# si estamos en una nueva epoca, tenemos que reordenar los indices de forma aleatori
 		if nueva_epoca:
 			nueva_epoca = False
 			indices_minibatch = np.random.choice(x.shape[0], x.shape[0], replace=False)
 
+		# si quedan elementos como para coger un minibatch, lo cogemos, si no, cogemos los
+		# elementos que quedan y hacemos una nueva epoca
 		if indice_actual+tam_batch < x.shape[0]:
 			minibatch = indices_minibatch[indice_actual:indice_actual+tam_batch]
 			indice_actual += tam_batch
@@ -101,6 +105,7 @@ def sgd(x, y, tasa_aprendizaje, tam_batch, maxIteraciones = 4000):
 			nueva_epoca = True
 
 
+		# aprendemos con los elementos del minibatch, escogidos de forma aleatoria
 		w = w - tasa_aprendizaje * dErr(x[minibatch], y[minibatch], w)
 		iterations += 1
 
@@ -141,13 +146,13 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 #LINEAR REGRESSION FOR CLASSIFICATION
 
-#CODIGO DEL ESTUDIANTE
-
+# aplicamos el metodo lineal, que en nuestro caso será sgd
 tasa_aprendizaje = 0.01
 
 intervalo_trabajo = [0, 1]
 w, iteraciones = sgd(x, y, tasa_aprendizaje, 32, 10000)
 
+# mostramos para training
 fig, ax = plt.subplots()
 
 ax.plot()
@@ -166,7 +171,7 @@ print("Error obtenido usando sgd dentro de la muestra (Ein): ", Err(x, y, w).mea
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
+# mostramos para test
 fig, ax = plt.subplots()
 
 ax.plot()
@@ -189,7 +194,8 @@ def signo(x):
 		return 1
 	return -1
 
-
+# funcion de error para el algoritmo pocket, contamos cuantos puntos están mal etiquetados
+# y los dividimos entre el numero de elementos totales para tener un error entre 0 y 1
 def num_errores_puntos(x, y, w):
 
 	errores = 0
@@ -207,7 +213,7 @@ def simula_unif(N, dim, rango):
 
 
 
-
+# algoritmo perceptron explicado en ejercicios anteriores y el PDF
 def ajusta_PLA(datos, label, max_iter, vini):
     #CODIGO DEL ESTUDIANTE
 	w = np.copy(vini)
@@ -232,18 +238,19 @@ def ajusta_PLA(datos, label, max_iter, vini):
 #POCKET ALGORITHM
 def pocket(x, y, iteraciones, w_ini):
 
-	# en el ej 2 nos daba mejores resultados si el comienzo lo haciamos aleatorio entre [0, 1]
-	#w_mejor = simula_unif(3, 1, [0, 1]).reshape(1, -1)[0]
+	# establecemos w al inicial
 	w_mejor = w_ini.copy()
-
+	# calculamos el mejor error hasta ahora
 	ein_w_mejor = num_errores_puntos(x, y, w_mejor)
 	w = w_mejor.copy()
 
 	it = 0
-
+	# mientas queden iteracioens
 	while it < iteraciones:
+		# ajustamos con PLA 1 única iteracion, ya que tenemos ruido como explicamos en el PDF
 		w, basura = ajusta_PLA(x, y, 1, w.copy())
 		ein_w = num_errores_puntos(x, y, w)
+		# si ha mejorado, lo actualizamos
 		if ein_w < ein_w_mejor:
 			w_mejor = w.copy()
 			ein_w_mejor = ein_w
@@ -255,8 +262,10 @@ def pocket(x, y, iteraciones, w_ini):
 #CODIGO DEL ESTUDIANTE
 #w, iteraciones = sgd(x, y, tasa_aprendizaje, 32, 10000)
 
+# ejecutamos el algoritmo pocket con la salida del algoritmo sgd, aplicandolo como mejora
 w = pocket(x, y, 200, w.copy())
 
+# mostramos el resultado para training
 fig, ax = plt.subplots()
 
 ax.plot()
@@ -276,7 +285,7 @@ print("Error obtenido usando pocket dentro de la muestra (Ein): ", ein)
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
-
+# mostramos el resultado para test
 fig, ax = plt.subplots()
 ax.plot(np.squeeze(x_test[np.where(y_test == -1),1]), np.squeeze(x_test[np.where(y_test == -1),2]), 'o', color='red', label='4')
 ax.plot(np.squeeze(x_test[np.where(y_test == 1),1]), np.squeeze(x_test[np.where(y_test == 1),2]), 'o', color='blue', label='8')
@@ -297,6 +306,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 #COTA SOBRE EL ERROR
 
+# calculamos las cotas con el delta dado, usando las formulas recomendadas y explicadas en la memoria
 delta = 0.05
 
 cota_ein = ein + np.sqrt((1/(2*len(x))) * np.log(2/delta) )
