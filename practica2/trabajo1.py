@@ -41,9 +41,11 @@ def simula_recta(intervalo):
 
 # EJERCICIO 1.1: Dibujar una gráfica con la nube de puntos de salida correspondiente
 
+# obtenemos de forma uniforme 50 puntos bidimensionales en [-50, 50]
 puntos_simula_unif = simula_unif(50, 2, [-50,50])
 #CODIGO DEL ESTUDIANTE
 
+# los dibujamos todos
 plt.scatter(puntos_simula_unif[:, 0], puntos_simula_unif[:, 1], c="b")
 plt.title("Nube de 50 puntos usando simula_unif con dimensión 2 en el rango [-50, 50]")
 plt.xlabel("Valor x de los puntos obtenidos")
@@ -56,7 +58,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 plt.clf()
 
-
+# obtenemos con una distribución normal 50 puntos bidimensionales en [5, 7]
 puntos_simula_gaus = simula_gaus(50, 2, np.array([5,7]))
 #CODIGO DEL ESTUDIANTE
 plt.scatter(puntos_simula_gaus[:, 0], puntos_simula_gaus[:, 1], c="r")
@@ -70,6 +72,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 plt.clf()
 
+
+# dibujamos ambos conjuntos de puntos a la vez en la misma gráfica
 plt.scatter(puntos_simula_unif[:, 0], puntos_simula_unif[:, 1], c="b", label="Puntos simula_unif")
 plt.scatter(puntos_simula_gaus[:, 0], puntos_simula_gaus[:, 1], c="r", label="Puntos simula_gaus")
 plt.xlabel("Valor x de los puntos obtenidos")
@@ -103,8 +107,8 @@ def signo(x):
 def f(x, y, a, b):
 	return signo(y - a*x - b)
 
-#CODIGO DEL ESTUDIANTE
 
+# obtenemos los 50 puntos y la recta para etiquetarlos
 intervalo_trabajo = [-50, 50]
 
 puntos_2d = simula_unif(100, 2, intervalo_trabajo)
@@ -115,10 +119,11 @@ etiquetas = []
 posibles_etiquetas = (1, -1)
 colores = {1: 'b', -1: 'r'}
 
+# etiquetamos cada punto a corde con la función de la recta
 for punto in puntos_2d:
 	etiquetas.append(f(punto[0], punto[1], a, b))
 
-
+# dibujamos los puntos sin etiquetar
 plt.scatter(puntos_2d[:, 0], puntos_2d[:, 1], c="b")
 plt.title("Nube de 100 puntos bidimensionales en el intervalo {} {}".format(intervalo_trabajo[0], intervalo_trabajo[1]))
 plt.xlabel("Valor x de los puntos obtenidos")
@@ -129,6 +134,7 @@ plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
+# dibujamos los puntos etiquetados, cada uno de un color
 for etiqueta in posibles_etiquetas:
 	indice = np.where(np.array(etiquetas) == etiqueta)
 
@@ -137,7 +143,7 @@ for etiqueta in posibles_etiquetas:
 
 
 # y = a*x + b
-
+# dibujamos la recta de etiquetado, usando los valores en x_1 de intervalo_trabajo para calcular x_2
 plt.plot(intervalo_trabajo, [a*intervalo_trabajo[0] + b, a*intervalo_trabajo[1] + b], 'k-', label='Recta obtenida aleatoriamente')
 
 
@@ -185,7 +191,7 @@ indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
 for i in indices:
 	etiquetas[i] = -etiquetas[i]
 
-# volvemos a dibujar
+# volvemos a dibujar ahora los conjuntos con ruido
 
 for etiqueta in posibles_etiquetas:
 	indice = np.where(np.array(etiquetas) == etiqueta)
@@ -221,6 +227,7 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 # EJERCICIO 1.3: Supongamos ahora que las siguientes funciones definen la frontera de clasificación de los puntos de la muestra en lugar de una recta
 
+# funciones dadas, usan solo un parametro para que funcione la función dada para dibujar
 def f1(x):
 	return np.float64((x[:, 0]-10)**2 + (x[:, 1] - 20)**2 - 400)
 
@@ -271,6 +278,7 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
 
 #CODIGO DEL ESTUDIANTE
 
+# llamamos a la funcion con el conjunto de puntos del apartado 2b, pero con las distintas funciones de frontera
 plot_datos_cuad(puntos_2d, etiquetas, f1, "Funcion f1")
 
 plot_datos_cuad(puntos_2d, etiquetas, f2, "Funcion f2")
