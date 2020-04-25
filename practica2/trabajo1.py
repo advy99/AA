@@ -104,8 +104,22 @@ def signo(x):
 		return 1
 	return -1
 
+
+
 def f(x, y, a, b):
 	return signo(y - a*x - b)
+
+
+def num_errores_puntos_f(x, y, a, b):
+
+	errores = 0
+	for i in range(len(x)):
+		if signo(f(x[i][0], x[i][1], a, b)) != y[i]:
+			errores += 1
+
+	errores = errores/len(x)
+
+	return errores
 
 
 # obtenemos los 50 puntos y la recta para etiquetarlos
@@ -155,6 +169,12 @@ plt.xlabel("Valor x de los puntos obtenidos")
 plt.ylabel("Valor y de los puntos obtenidos")
 
 plt.show()
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+print("Porcentaje de errores en el etiquetado: ", num_errores_puntos_f(puntos_2d, etiquetas, a, b))
+
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
@@ -215,6 +235,10 @@ plt.show()
 
 input("\n--- Pulsar tecla para continuar ---\n")
 
+print("Porcentaje de errores en el etiquetado: ", num_errores_puntos_f(puntos_2d, etiquetas, a, b))
+
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 
@@ -240,6 +264,19 @@ def f3(x):
 def f4(x):
 	return np.float64( x[:, 1] - 20*x[:, 0]**2 - 5*x[:, 0] + 3 )
 
+
+
+def num_errores_puntos_f_n(fun, x, y):
+
+	errores = 0
+	val = fun(x)
+	for i in range(len(x)):
+		if signo(val[i]) != y[i]:
+			errores += 1
+
+	errores = errores/len(x)
+
+	return errores
 
 def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y axis'):
     #Preparar datos
@@ -281,11 +318,27 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
 # llamamos a la funcion con el conjunto de puntos del apartado 2b, pero con las distintas funciones de frontera
 plot_datos_cuad(puntos_2d, etiquetas, f1, "Funcion f1")
 
+print("Porcentaje de errores en el etiquetado usando f1: ", num_errores_puntos_f_n(f1, puntos_2d, etiquetas))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
 plot_datos_cuad(puntos_2d, etiquetas, f2, "Funcion f2")
+
+print("Porcentaje de errores en el etiquetado usando f2: ", num_errores_puntos_f_n(f2, puntos_2d, etiquetas))
+input("\n--- Pulsar tecla para continuar ---\n")
+
 
 plot_datos_cuad(puntos_2d, etiquetas, f3, "Funcion f3")
 
+print("Porcentaje de errores en el etiquetado usando f3: ", num_errores_puntos_f_n(f3, puntos_2d, etiquetas))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+
 plot_datos_cuad(puntos_2d, etiquetas, f4, "Funcion f4")
+
+print("Porcentaje de errores en el etiquetado usando f4: ", num_errores_puntos_f_n(f4, puntos_2d, etiquetas))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 input("\n--- Pulsar tecla para continuar ---\n")
