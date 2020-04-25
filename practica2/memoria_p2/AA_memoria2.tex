@@ -590,7 +590,7 @@ W obtenida: [452.          56.54560859 -14.87894933]
 Iteraciones: 10000
 \end{lstlisting}
 
-Vemos como en este caso utiliza todas las iteraciones y no conseguimos a obtener un óptimo que nos separe totalmente las etiquetas, ya que el ruido se lo impide. Al estar usando una recta, con dos puntos con ruido entra en bucle infinito, ya que el primer punto modifica el vector de pesos, dejando el segundo punto fuera y viceversa, es decir, el ruido hace que siempre encuentre mejora, ya que la recta no es capaz de separar los puntos con ruido.
+Vemos como en este caso utiliza todas las iteraciones y no conseguimos a obtener un óptimo que nos separe totalmente las etiquetas, ya que el ruido se lo impide. Al estar usando una recta, con dos puntos con ruido entra en bucle infinito, ya que el primer punto modifica el vector de pesos, dejando el segundo punto fuera y viceversa, es decir, el ruido hace que siempre encuentre mejora, ya que la recta no es capaz de separar los puntos con ruido. Esto veremos más adelante como solucionarlo usando el algoritmo Pocket, que añadirá memoria al algoritmo PLA, y permitirá trabajar con ruido, cosa que este algoritmo, como claramente vemos, no contempla.
 
 
 Si ejecutamos la misma prueba diez veces pero con el vector de peso con valores iniciales aleatorios, obtenemos lo siguiente:
