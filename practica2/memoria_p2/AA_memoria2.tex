@@ -394,6 +394,8 @@ def num_errores_puntos_f_n(fun, x, y):
 	return errores
 \end{lstlisting}
 
+\newpage
+
 \textbf{Función 1:} 
 
 $$ f(x, y)_1 = (x - 10)^2 + (y - 20)^2 - 400  $$
@@ -1008,6 +1010,8 @@ Vemos como hemos reducido en gran cantidad el error, y el error obtenido es prin
 
 \subsection{Calculo de la cota del error fuera de la muestra}
 
+Como hemos supuesto durante toda la asignatura de aprendizaje automático, las muestras con las que trabajamos para entrenar ($E_{in}$) son muestras independientes e idénticamente distribuidas, por lo que sabemos que si reducimos el error dentro de la muestra, también lo hará fuera de esta ($E_{out}$), por lo tanto, podemos calcular una cota para el error fuera de la muestra usando esto. Esta cota se basa en que $E_{out}(h) \leq E_{in}(h) + error$, es decir, que el error fuera de la muestra es el error dentro de la muestra (ya que la muestra es i.i.d) sumando un pequeño error.
+
 Vamos a calcular una cota sobre el verdadero valor de $E_{out}$. Para esto usaremos lo aprendido en teoría:
 
 $$ E_{out}(h) \leq E_{in}(h) + \sqrt{\frac{1}{2*N}*log\frac{2}{\delta}} $$
@@ -1047,6 +1051,9 @@ Vemos como al calcular las cotas, la cota en $E_{test}$ es mayor ya que el segun
 
 \bibitem{teoria}
 Diapositivas de teoría
+
+\bibitem{libro}
+Learning From Data by Yaser S. Abu-Mostafa, Malik Magdon-Ismail, Hsuan-Tien Lin
 
 \bibitem{documentacion-numpy}
 Documentación de NumPy:
