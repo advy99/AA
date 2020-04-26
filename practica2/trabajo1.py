@@ -185,31 +185,39 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 #CODIGO DEL ESTUDIANTE
 
-# no podemos usar el for, tenemos que sacarlos a la vez
-# si hacemos primero unos, al meter el ruido en el positivo, pasan a ser negativo,
-# y se les podría llegar a meter ruido otra vez al hacer el ruido del negativo
-indices_positivos = np.where(np.array(etiquetas) == 1)
-indices_positivos = indices_positivos[0]
-
-indices_negativos = np.where(np.array(etiquetas) == -1)
-indices_negativos = indices_negativos[0]
+def ruido(etiquetas):
 
 
-# aplicamos el ruido a los positivos
-num_a_aplicar = len(indices_positivos) * 0.1
-num_a_aplicar = int(round(num_a_aplicar))
-indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
+	# no podemos usar el for, tenemos que sacarlos a la vez
+	# si hacemos primero unos, al meter el ruido en el positivo, pasan a ser negativo,
+	# y se les podría llegar a meter ruido otra vez al hacer el ruido del negativo
+	indices_positivos = np.where(np.array(etiquetas) == 1)
+	indices_positivos = indices_positivos[0]
 
-for i in indices:
-	etiquetas[i] = -etiquetas[i]
+	indices_negativos = np.where(np.array(etiquetas) == -1)
+	indices_negativos = indices_negativos[0]
 
-# aplicamos el ruido a los negativos
-num_a_aplicar = len(indices_negativos) * 0.1
-num_a_aplicar = int(round(num_a_aplicar))
-indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
 
-for i in indices:
-	etiquetas[i] = -etiquetas[i]
+	# aplicamos el ruido a los positivos
+	num_a_aplicar = len(indices_positivos) * 0.1
+	num_a_aplicar = int(round(num_a_aplicar))
+	indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
+
+	for i in indices:
+		etiquetas[i] = -etiquetas[i]
+
+	# aplicamos el ruido a los negativos
+	num_a_aplicar = len(indices_negativos) * 0.1
+	num_a_aplicar = int(round(num_a_aplicar))
+	indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
+
+	for i in indices:
+		etiquetas[i] = -etiquetas[i]
+
+
+	return etiquetas
+
+etiquetas = ruido(etiquetas)
 
 # volvemos a dibujar ahora los conjuntos con ruido
 
@@ -315,16 +323,58 @@ def plot_datos_cuad(X, y, fz, title='Point cloud plot', xaxis='x axis', yaxis='y
 
 #CODIGO DEL ESTUDIANTE
 
+etiquetas_orig = etiquetas.copy()
+
+
+# llamamos a la funcion con el conjunto de puntos del apartado 2b, pero con las distintas funciones de frontera
+plot_datos_cuad(puntos_2d, etiquetas_orig, f1, "Funcion f1 con etiquetas de la recta")
+
+print("Porcentaje de errores en el etiquetado usando f1 y las etiquetas de la recta: ", num_errores_puntos_f_n(f1, puntos_2d, etiquetas_orig))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+etiquetas = []
+
+valores = f1(puntos_2d)
+for val in valores:
+	etiquetas.append(signo(val))
+
+ruido(etiquetas)
+
 # llamamos a la funcion con el conjunto de puntos del apartado 2b, pero con las distintas funciones de frontera
 plot_datos_cuad(puntos_2d, etiquetas, f1, "Funcion f1")
 
 print("Porcentaje de errores en el etiquetado usando f1: ", num_errores_puntos_f_n(f1, puntos_2d, etiquetas))
 input("\n--- Pulsar tecla para continuar ---\n")
 
+etiquetas = []
+
+valores = f2(puntos_2d)
+for val in valores:
+	etiquetas.append(signo(val))
+
+ruido(etiquetas)
+
+
+plot_datos_cuad(puntos_2d, etiquetas_orig, f2, "Funcion f2 con etiquetas de la recta")
+
+print("Porcentaje de errores en el etiquetado usando f2: ", num_errores_puntos_f_n(f2, puntos_2d, etiquetas_orig))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 plot_datos_cuad(puntos_2d, etiquetas, f2, "Funcion f2")
 
 print("Porcentaje de errores en el etiquetado usando f2: ", num_errores_puntos_f_n(f2, puntos_2d, etiquetas))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+etiquetas = []
+valores = f3(puntos_2d)
+for val in valores:
+	etiquetas.append(signo(val))
+
+ruido(etiquetas)
+
+plot_datos_cuad(puntos_2d, etiquetas_orig, f3, "Funcion f3 con etiquetas de la recta")
+
+print("Porcentaje de errores en el etiquetado de la recta usando f3: ", num_errores_puntos_f_n(f3, puntos_2d, etiquetas_orig))
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
@@ -333,7 +383,18 @@ plot_datos_cuad(puntos_2d, etiquetas, f3, "Funcion f3")
 print("Porcentaje de errores en el etiquetado usando f3: ", num_errores_puntos_f_n(f3, puntos_2d, etiquetas))
 input("\n--- Pulsar tecla para continuar ---\n")
 
+etiquetas = []
 
+valores = f4(puntos_2d)
+for val in valores:
+	etiquetas.append(signo(val))
+
+ruido(etiquetas)
+
+plot_datos_cuad(puntos_2d, etiquetas_orig, f4, "Funcion f4 con etiquetas de la recta")
+
+print("Porcentaje de errores en el etiquetado de la recta usando f4: ", num_errores_puntos_f_n(f4, puntos_2d, etiquetas_orig))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 plot_datos_cuad(puntos_2d, etiquetas, f4, "Funcion f4")
 
