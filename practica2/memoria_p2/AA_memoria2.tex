@@ -324,34 +324,35 @@ Porcentaje de errores en el etiquetado:  0.0
 
 \subsubsection{Aplicación del ruido a los datos}
 
-Tras obtener esta recta, procedemos a aplicar el ruido al 10\% de cada etiqueta, como vemos en el siguiente código:
+Tras obtener esta recta, procedemos a aplicar el ruido al 10\% de cada etiqueta, como vemos en el siguiente función::
 
 \begin{lstlisting}
-# no podemos usar el for, tenemos que sacarlos a la vez
-# si hacemos primero unos, al meter el ruido en el positivo, pasan a ser negativo,
-# y se les podría llegar a meter ruido otra vez al hacer el ruido del negativo
-indices_positivos = np.where(np.array(etiquetas) == 1)
-indices_positivos = indices_positivos[0]
+def ruido(etuquetas):
+	# no podemos usar el for, tenemos que sacarlos a la vez
+	# si hacemos primero unos, al meter el ruido en el positivo, pasan a ser negativo,
+	# y se les podría llegar a meter ruido otra vez al hacer el ruido del negativo
+	indices_positivos = np.where(np.array(etiquetas) == 1)
+	indices_positivos = indices_positivos[0]
 
-indices_negativos = np.where(np.array(etiquetas) == -1)
-indices_negativos = indices_negativos[0]
+	indices_negativos = np.where(np.array(etiquetas) == -1)
+	indices_negativos = indices_negativos[0]
 
 
-# aplicamos el ruido a los positivos
-num_a_aplicar = len(indices_positivos) * 0.1
-num_a_aplicar = int(round(num_a_aplicar))
-indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
+	# aplicamos el ruido a los positivos
+	num_a_aplicar = len(indices_positivos) * 0.1
+	num_a_aplicar = int(round(num_a_aplicar))
+	indices = np.random.choice(indices_positivos, num_a_aplicar, replace=False)
 
-for i in indices:
-	etiquetas[i] = -etiquetas[i]
+	for i in indices:
+		etiquetas[i] = -etiquetas[i]
 
-# aplicamos el ruido a los negativos
-num_a_aplicar = len(indices_negativos) * 0.1
-num_a_aplicar = int(round(num_a_aplicar))
-indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
+	# aplicamos el ruido a los negativos
+	num_a_aplicar = len(indices_negativos) * 0.1
+	num_a_aplicar = int(round(num_a_aplicar))
+	indices = np.random.choice(indices_negativos, num_a_aplicar, replace=False)
 
-for i in indices:
-	etiquetas[i] = -etiquetas[i]
+	for i in indices:
+		etiquetas[i] = -etiquetas[i]
 
 \end{lstlisting}
 
@@ -380,6 +381,8 @@ En este apartado debemos cambiar la función con la que dibujamos la frontera de
 
 En este caso, hemos modificado la función para comprobar el número de puntos mal clasificados para que se adapte a las funciones usadas:
 
+El enunciado del ejercicio me ha resultado ambiguo y no se si se refería a mantener el etiquetado de la recta y probar con las funciones, o mantener los puntos, volver a etiquetarlos con las nuevas funciones, y mostrar su comportamiento. Me ha resultado ambiguo ya que obviamente, si etiquetamos con las funciones y aplicamos el ruido siempre mantendremos un error del 10\%, ya que siempre modificamos un 10\% de las etiquetas, mientras que tampoco tiene sentido que si los etiquetamos con una recta probar a agruparlos con otras funciones. Por esta ambigüedad en el guión del PDF he decidido hacer ambos experimentos.
+
 \begin{lstlisting}
 def num_errores_puntos_f_n(fun, x, y):
 
@@ -395,6 +398,8 @@ def num_errores_puntos_f_n(fun, x, y):
 \end{lstlisting}
 
 \newpage
+
+\textbf{Uso de las etiquetas obtenidas con la recta:}
 
 \textbf{Función 1:} 
 
@@ -472,6 +477,80 @@ Vemos como lo que comente para la primera función se sigue repitiendo con todas
 De hecho vemos como llegamos a porcentajes enormes en los errores al etiquetar, ya que al usar clases más complejas no se adaptan de ninguna forma, y puede ocurrir como en el caso 4, en los que al no etiquetar ningún punto en la zona azul, el error es más bajo que en la función 3 ya que todos los rojos si que los etiqueta de forma correcta.
 
 Como conclusión, no solo en este ejercicio sino en general, el ruido hace que sea mucho más complejo obtener un buen clasificador debido a que la frontera es mucho más grande e incluso, como en este ejemplo, es posible que amplíe la frontera a todo el espacio en el que trabajamos, al poder aplicar el ruido a cualquier etiqueta. Si aplicamos el ruido exclusivamente a etiquetas cercanas a la función con la que etiquetamos, seguimos manteniendo la frontera, aunque un poco mayor.
+
+\textbf{Uso de las etiquetas obtenidas con cada función:}
+
+\textbf{Función 1:} 
+
+$$ f(x, y)_1 = (x - 10)^2 + (y - 20)^2 - 400  $$
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej1-3-f1-etiq.png}
+ 		 \caption{Función $f(x, y)_1$}
+  		\label{fig:ej1-f1}
+
+\end{figure}
+
+\begin{lstlisting}
+Porcentaje de errores en el etiquetado usando f1:  0.1
+\end{lstlisting}
+
+
+\textbf{Función 2:} 
+
+$$ f(x, y)_2 = 0,5*(x + 10)^2 + (y - 20)^2 - 400  $$
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej1-3-f2-etiq.png}
+ 		 \caption{Función $f(x, y)_2$}
+  		\label{fig:ej1-f2}
+
+\end{figure}
+
+\begin{lstlisting}
+Porcentaje de errores en el etiquetado usando f2:  0.1
+\end{lstlisting}
+
+
+
+\textbf{Función 3:} 
+
+$$ f(x, y)_3 = 0,5*(x - 10)^2 + (y + 20)^2 - 400 $$
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej1-3-f3-etiq.png}
+ 		 \caption{Función $f(x, y)_3$}
+  		\label{fig:ej1-f3}
+
+\end{figure}
+
+\begin{lstlisting}
+Porcentaje de errores en el etiquetado usando f3:  0.1
+\end{lstlisting}
+
+
+\textbf{Función 4:} 
+
+$$ f(x, y)_4 = y - 20*x^2 -5*x +3  $$
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale = 0.70]{ej1-3-f4-etiq.png}
+ 		 \caption{Función $f(x, y)_4$}
+  		\label{fig:ej1-f4}
+
+\end{figure}
+
+\begin{lstlisting}
+Porcentaje de errores en el etiquetado usando f4:  0.1
+\end{lstlisting}
+
+Como hemos comentado, da igual que función utilicemos para etiquetar los puntos, si estos tienen ruido, siempre va a tener un error ya que es implosible etiquetarlos todos de forma correcta.
+
+En este caso el error es del 10\% ya que siempre introducimos ese porcentaje de ruido.
 
 \newpage
 
@@ -644,6 +723,14 @@ b = x[puntos_recta[0]][1] - (a*x[puntos_recta[0]][0])
 \subsubsection{Implementación de Regresión Logística con SGD}
 
 Para la implementación usaremos el algoritmo SGD usado en la práctica anterior además del criterio de aprendizaje ERM (Empirical Risk Minimization), que como vemos en las diapositivas de teoría podemos aplicar Regresión Logística:
+
+$$ E_{in}(w) = ln(1 + e^{-y_nw_Tx_n})  $$
+
+Y su respectivo gradiente:
+
+$$ \nabla E_{in} = - \frac{1}{N} \sum_{n=1}^N \frac{y_nx_n}{1 + e^{y_nw_T(t)x_n}}$$
+
+Quedando la siguiente implementación:
 
 \begin{lstlisting}
 def error_erm(x, y, w):
