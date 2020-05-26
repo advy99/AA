@@ -30,11 +30,13 @@ def leer_datos(fichero):
 
 
 
+datos_tra = "datos/optdigits.tra"
 
+print("Leyendo datos de", datos_tra )
+x, y = leer_datos(datos_tra)
+print("Leidos ", y.size, " datos con sus respectivas etiquetas")
 
-print("Leyendo datos de la carpeta datos/")
-x, y = leer_datos("datos/optdigits.tra")
-
+print("Cada dato del conjunto de datos tiene ", x[0].size, " variables.")
 
 # https://stackoverflow.com/questions/28663856/how-to-count-the-occurrence-of-certain-item-in-an-ndarray-in-python
 unique, contador = np.unique(y, return_counts=True)
