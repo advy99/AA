@@ -176,20 +176,47 @@ Programación  \hspace{0.05cm} }
 
 
 
-En este problema tenemos datos sobre imágenes de números escritos a mano por un total de 43 personas, los números escritos por 30 de estas son el conjunto de training dado y los números de las 13 personas restantes conforman el conjunto de test.
+En este problema tenemos datos sobre imágenes de números escritos a mano por un total de 43 personas, los números escritos por 30 de estas son el conjunto de training dado y los números de las 13 personas restantes conforman el conjunto de test. Estos datos se han obtenido de la base de datos \textit{Machine Learning Repository}, en concreto usaremos el conjunto de datos \textit{Optical Recognition of Handwritter Digits Data Set} \cite{mlr_digitos}.
 
-Cada número se representa como una imagen de 32 por 32 bitmaps, donde 1 representa que en dicha posición se ha escrito y un 0 no.
+Cada número se representa como una imagen de 32 por 32 bitmaps, donde 1 representa que en dicha posición se ha escrito y un 0 no. Como podemos leer en la descripción del \textit{data set}, los datos que usamos están preprocesados, en lugar de tener una matriz 32 por 32 se han separado en bloques de 4 por 4 sin solapamiento de forma que tenemos una matriz 8 por 8, 64 valores entre 0 a 16,0 si el bloque no tiene ningún pixel en negro y 16 si todos los píxeles del bloque son negros.
+
+Los ficheros de datos de entrada cuentan con 65 columnas por cada fila, los 64 valores de la imagen y por último la clase a la que pertenece dicho dato. Explicaré que significa cada valor y que clases posibles pueden tomar en las siguientes secciones.
 
 \subsubsection{X del problema.}
 
+El conjunto X del problema son los datos de entrada con los que entrenaremos el modelo. 
+
+Como leemos del fichero de información de descripción disponible en la base de datos\cite{mlr_digitos}, cada dato x cuenta con 64 variables cuyo valor está en el rango [0,16], cada variable representa una sección 4 por 4 de la imagen leída del número, si el valor es 16 quiere decir que la sección está por completo escrita, y un 0 que ninguno de sus píxeles está escrito el valor.
+
+Comprobaremos que esto efectivamente es así cuando hablemos sobre los conjuntos de training y test más adelante.
 
 \subsubsection{Y del problema.}
 
+Las etiquetas del problema representan los valores escritos en la entrada, es decir, un dato leído tendrá sus 64 valores correspondientes a la información de la imagen leída y la etiqueta será un valor entre [0,9] que representa el valor escrito en la imagen.
+
 \subsubsection{F del problema.}
+
+La función $f$ del problema es la función desconocida que clasifica de forma perfecta cualquier número. El objetivo de esta práctica es obtener una función $g$ perteneciente al conjunto de clases de funciones a usar (del que hablaré más adelante) que sea lo más parecida posible a la función $f$.
+
+Este problema lo podemos tratar como un problema de aprendizaje ya que los datos cuentan con un patrón (si a una entrada le damos una etiqueta es muy probable que las entradas similares tengan la misma etiqueta), la función $f$ es desconocida y no es calculable, ya que si lo fuera no necesitamos utilizar técnicas de aprendizaje, simplemente aplicamos la función y hemos resuelto el problema, y por último, tenemos datos con los que entrenar nuestro modelo.
 
 \subsection{Clases de funciones a usar.}
 
+Para este problema utilizaré combinaciones lineales de los datos. Dado que las características de los datos de entrada son la cantidad de unos que hay en una zona de la matriz que representa la imagen no tiene sentido aplicar transformaciones no lineales a los valores, es decir, no tiene ningún significado aplicar el cuadrado a un número de bits.
+
+Otra razón es que el problema ya tiene un gran número de dimensiones
+
 \subsection{Conjuntos de training y test.}
+
+
+Como vimos en la introducción del problema, podemos comprobar que efectivamente cada dato tiene 64 variables:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{clasificacion/num_datos.png}
+	\caption{Información sobre los datos.}
+	\label{datosClasificacion}
+\end{figure}
 
 \subsection{Preprocesado de los datos.}
 
@@ -253,28 +280,6 @@ Cada número se representa como una imagen de 32 por 32 bitmaps, donde 1 represe
 
 \begin{thebibliography}{9}
 
-\bibitem{teoria}
-Diapositivas de teoría
-
-\bibitem{libro}
-Learning From Data by Yaser S. Abu-Mostafa, Malik Magdon-Ismail, Hsuan-Tien Lin
-
-\bibitem{documentacion-numpy}
-Documentación de NumPy:
-
-\url{https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.choice.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.transpose.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.dot.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.linalg.inv.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.c_.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.square.html}
-
-\url{https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html}
 
 \bibitem{mlr_digitos}
 Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set 
@@ -291,7 +296,7 @@ Machine Learning Repository: Communities and Crime Data Set
 \url{https://scikit-learn.org/stable/modules/linear_model.html}
 
 \bibitem{sklearn-model-selection}
-https://scikit-learn.org/stable/modules/classes.html#module-sklearn.model_selection
+\url{https://scikit-learn.org/stable/modules/classes.html#module-sklearn.model_selection}
 
 \end{thebibliography}
 
