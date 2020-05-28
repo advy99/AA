@@ -187,6 +187,8 @@ Cada número se representa como una imagen de 32 por 32 bitmaps, donde 1 represe
 
 Los ficheros de datos de entrada cuentan con 65 columnas por cada fila, los 64 valores de la imagen y por último la clase a la que pertenece dicho dato. Explicaré que significa cada valor y que clases posibles pueden tomar en las siguientes secciones.
 
+Con respecto al problema, debemos ser conscientes de que con gran seguridad contarán con ruido ya que la forma de escritura de cada persona será distinto, y habrá imágenes muy parecidas que sin embargo sean de clase distintas.
+
 \subsubsection{X del problema.}
 
 El conjunto X del problema son los datos de entrada con los que entrenaremos el modelo. 
@@ -276,9 +278,24 @@ Además de este motivo, no voy a realizar preprocesado de datos ya que en la inf
 
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
 
+En este apartado fijaremos la métrica que usaremos para la evaluación, es decir, la métrica que utilizaremos para calcular el error del modelo una vez esté entrenado, es decir, saber como bien se comporta. Esto no quiere decir que la métrica que usará el modelo para entrenarse sea esta, ya que como veremos usaremos una distinta, lo cual justificaré más adelante.
+
+Debido a que estamos en un problema de clasificación la métrica de evaluación será la tasa de aciertos, es decir, la tasa de datos que asigna la etiqueta correcta. He hecho esta elección ya que no nos interesa saber un valor numérico sobre cuanto se ha equivocado, si no si es capaz de clasificar los puntos bien.
+
 \subsection{Técnica de ajuste elegida.}
 
+Para realizar el ajuste usaremos la métrica de Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
+
+Usaremos esta métrica de ajuste ya que es bastante conocida para nosotros y la hemos utilizado en otras prácticas de clasificación en las que hemos usado modelos lineales basados en regresión, además de ser el error usado en la prueba de la que nos habla la descripción del dataset.
+
+
+$$ \frac{1}{N} \sum_{i=1}^{N}{(y_i - \hat{y}_i)^2} $$
+
+Siendo $y_i$ la clase real del dato e $\hat{y}_i$ la clase predecida por el modelo.
+
 \subsection{Necesidad de regulación.}
+
+La regularización es necesaria para evitar el overfitting al entrenar el modelo. La idea de utilizar regularización es minimizar el cambio en la función de error, para obligar a que no se ajuste de forma perfecta a los datos. Esta técnica nos será útil especialmente cuando los datos contienen ruido, como es nuestro caso.
 
 Debido a la alta dimensionalidad de los datos, a pesar de no utilizar un conjunto de clases de funciones complejos, es posible que se genere overfitting, aunque no lo sabemos a priori, por este motivo en los modelos a usar que explicaré más adelante probaré a utilizar los distintos modelos con y sin regularización.
 
@@ -286,9 +303,22 @@ En principio si es necesaria esta regularización, sin embargo voy a realizar es
 
 Para aplicar la regularización existen dos normas\cite{l1l2regularizacion}.
 
+
 \subsubsection{Norma L1: }
 
-\subsubsection{Normal L2:}
+La norma L1, llamada Regresión Lasso, consiste en añadir el valor absoluto de la magnitud multiplicado por el coeficiente de penalización:
+
+$$ \lambda \sum_{j=1}^{p}{|\beta_j|} $$
+
+\subsubsection{Norma L2:}
+
+La norma L2, también llamada Ridge Regression, se basa en añadir el cuadrado de la magnitud por el coeficiente de penalización en la función de coste:
+
+$$ \lambda \sum_{j=1}^{p}{\beta_j^2} $$
+
+
+En este problema utilizaremos la norma L2 ya que es la más similar a la métrica de ajuste usada. En caso de que al realizar pruebas y comprobar que la norma L1 se comporta mejor, modificaré esta sección explicando el cambio (si se llega a producir).
+
 
 \subsection{Modelos a usar.}
 
