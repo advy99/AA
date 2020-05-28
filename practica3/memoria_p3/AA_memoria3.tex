@@ -170,11 +170,16 @@ Programación  \hspace{0.05cm} }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+\section*{Introducción}
+
+Para esta práctica se pide explicar el proceso a realizar para resolver dos problemas de aprendizaje utilizando los modelos lineales vistos a lo largo de la teoría y prácticas de la asignatura.
+
+Para esta práctica utilizaré la biblioteca Scikit-Learn\cite{sklearn} ya que cuenta con todas las herramientas que utilizaré y explicaré más adelante. No usé esta herramienta en prácticas anteriores ya que se nos pedía implementar los algoritmos y herramientas, sin embargo para esta práctica nos será más sencillo utilizarla.
+
 \section{Problema de clasificación.}
 
 \subsection{Comprender el problema. Identificar X, Y y F en el problema.}
-
-
 
 En este problema tenemos datos sobre imágenes de números escritos a mano por un total de 43 personas, los números escritos por 30 de estas son el conjunto de training dado y los números de las 13 personas restantes conforman el conjunto de test. Estos datos se han obtenido de la base de datos \textit{Machine Learning Repository}, en concreto usaremos el conjunto de datos \textit{Optical Recognition of Handwritter Digits Data Set} \cite{mlr_digitos}.
 
@@ -204,9 +209,13 @@ Este problema lo podemos tratar como un problema de aprendizaje ya que los datos
 
 Para este problema utilizaré combinaciones lineales de los datos. Dado que las características de los datos de entrada son la cantidad de unos que hay en una zona de la matriz que representa la imagen no tiene sentido aplicar transformaciones no lineales a los valores, es decir, no tiene ningún significado aplicar el cuadrado a un número de bits.
 
-Otra razón es que el problema ya tiene un gran número de dimensiones
+Otra razón es que el problema ya es de gran dimensionalidad, si usamos clases de funciones más complejas podría presentar problemas de overfitting o una necesidad mayor de tiempo de entrenamiento.
 
 \subsection{Conjuntos de training y test.}
+
+El problema ya nos proporciona un conjunto de training y test separado, luego no tendremos que separarlos para este problema.
+
+\subsubsection{Conjunto de training}
 
 
 Como vimos en la introducción del problema, podemos comprobar que efectivamente cada dato tiene 64 variables:
@@ -217,6 +226,13 @@ Como vimos en la introducción del problema, podemos comprobar que efectivamente
 	\caption{Información sobre los datos.}
 	\label{datosClasificacion}
 \end{figure}
+
+
+\subsubsection{Conjunto de validación}
+
+
+
+\subsubsection{Conjunto de test}
 
 \subsection{Preprocesado de los datos.}
 
@@ -281,10 +297,19 @@ Como vimos en la introducción del problema, podemos comprobar que efectivamente
 \begin{thebibliography}{9}
 
 
+\bibitem{sklearn}
+Página web de Scikit Learn
+\url{https://scikit-learn.org/stable/user_guide.html}
+
+
 \bibitem{mlr_digitos}
 Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set 
 
 \url{https://archive.ics.uci.edu/ml/datasets/optical+recognition+of+handwritten+digits}
+
+
+\bibitem{crossval}
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html}
 
 
 \bibitem{mlr_crimen}
