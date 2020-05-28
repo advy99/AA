@@ -272,11 +272,23 @@ Como he comentado con respecto a los datos de este problema, en el repositorio d
 
 Los valores todos están en un rango fijo que es el mismo para todos (entre 0 y 16), por lo que en principio no va a afectar, por lo que no lo modificaré. Es posible que en esta sección aparezca una nota en la que si finalmente se ha obtenido mejor resultado normalizando los valores entre 0 y 1 se ha aplicado esa transformación a los datos (básicamente consiste en dividir todos los datos por 16 para que se encuentren en el rango [0, 1]).
 
+Además de este motivo, no voy a realizar preprocesado de datos ya que en la información del dataset se nos informa de que con ese preprocesado los datos se comportan de manera correcta, es decir, que en principio no debería haber problemas, aun así si observo que no logramos unos resultados adecuados ampliaré esta sección para intentar aplicar un preprocesado que nos mejore los resultados.
+
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
 
 \subsection{Técnica de ajuste elegida.}
 
 \subsection{Necesidad de regulación.}
+
+Debido a la alta dimensionalidad de los datos, a pesar de no utilizar un conjunto de clases de funciones complejos, es posible que se genere overfitting, aunque no lo sabemos a priori, por este motivo en los modelos a usar que explicaré más adelante probaré a utilizar los distintos modelos con y sin regularización.
+
+En principio si es necesaria esta regularización, sin embargo voy a realizar estos experimentos para demostrar su importancia.
+
+Para aplicar la regularización existen dos normas\cite{l1l2regularizacion}.
+
+\subsubsection{Norma L1: }
+
+\subsubsection{Normal L2:}
 
 \subsection{Modelos a usar.}
 
@@ -285,6 +297,7 @@ Los valores todos están en un rango fijo que es el mismo para todos (entre 0 y 
 
 \subsubsection{Regresión Lineal con regularización (Ridge Regression).}
 
+\subsubsection{Regresión Logística.}
 
 \subsubsection{Gradiente Descendente Estocástico.}
 
@@ -319,6 +332,10 @@ Los valores todos están en un rango fijo que es el mismo para todos (entre 0 y 
 \subsection{Preprocesado de los datos.}
 
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
+
+\subsubsection{Métrica de ajuste.}
+
+\subsubsection{Métrica de evaluación.}
 
 \subsection{Técnica de ajuste elegida.}
 
@@ -361,8 +378,17 @@ Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set
 \bibitem{ridge}
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
 
+\bibitem{logisticregression}
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression}
+
 \bibitem{sgdclasificacion}
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier}
+
+\bibitem{l1l2regularizacion}
+Métodos de regularización: Norma L1 y L2:
+
+\url{https://towardsdatascience.com/l1-and-l2-regularization-methods-ce25e7fc831c}
+
 
 \bibitem{mlr_crimen}
 Machine Learning Repository: Communities and Crime Data Set  
