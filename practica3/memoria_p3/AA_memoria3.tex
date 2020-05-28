@@ -217,22 +217,53 @@ El problema ya nos proporciona un conjunto de training y test separado, luego no
 
 \subsubsection{Conjunto de training}
 
-
-Como vimos en la introducción del problema, podemos comprobar que efectivamente cada dato tiene 64 variables:
+Tras leer los ficheros dados de training podemos comprobar los datos del problema. En este caso el conjunto dado de training cuenta con 3823 datos y como vimos en la introducción del problema, podemos comprobar que efectivamente cada dato tiene 64 variables:
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.7]{clasificacion/num_datos.png}
-	\caption{Información sobre los datos.}
+	\caption{Información sobre el número de datos en training.}
 	\label{datosClasificacion}
 \end{figure}
 
+De la lectura de este fichero también podemos ver el reparto de los datos según su clase al estar realizando técnicas de aprendizaje supervisado (como hemos hecho en anteriores prácticas y también haremos en esta):
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=1]{clasificacion/datos_tra.png}
+	\caption{Información sobre la clase de los datos en training.}
+	\label{claseDatosClasificacion}
+\end{figure}
+
+Como podemos ver el número de elementos de cada clase está equilibrado, luego en principio no debería generar problemas al entrenar nuestro modelo. Es importante que en el conjunto de training se de este equilibrio y se encuentren datos de todas las clases, ya que en caso contrario podría ocurrir que en el conjunto de test o incluso fuera de la muestra fallemos al intentar clasificar un dato que contiene información sobre una clase desconocida al entrenar, pero como podemos ver, este no es el caso.
 
 \subsubsection{Conjunto de validación}
 
+A partir del conjunto de entrenamiento obtendré un conjunto para realizar la validación del modelo. Usaré cross-validation a través de las herramientas que ofrece Scitik-Learn para realizar la validación cruzada\cite{crossval}, aunque comentaré en la sección de hiperparámetros el número de particiones de validación. 
 
+Este método consiste en dividir los datos de entrenamiento, de forma que tengamos un conjunto de entrenamiento más pequeño y $k$ conjuntos de validación ($k$ es un entero que discutiré en la sección de hiperparámetros), de forma que se entrenará $k$  veces y se validará con las $k$ particiones de validación, y finalmente nos quedaremos con la media de estas, para asegurar tener un buen ajuste.
 
 \subsubsection{Conjunto de test}
+
+En el fichero que nos proporcionan con los datos de test vemos que tenemos 1797 datos (bastantes menos que en el conjunto de training), pero como es de esperar, cada dato usa la misma representación, es decir, está compuesto por 64 características y la clase a la que pertenece:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{clasificacion/num_datos_test.png}
+	\caption{Información sobre el número de datos  en test.}
+	\label{datosClasificacionTest}
+\end{figure}
+
+
+Con respecto al número de datos por clase, en este conjunto también vemos que tenemos una distribución uniforme de los datos entre las clases, aunque en este caso no es importante al no usar este conjunto para el entrenamiento, es decir, este conjunto de datos solo lo usaremos para comprobar como se comportan los distintos modelos.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{clasificacion/datos_test.png}
+	\caption{Información sobre la clase de los datos en test.}
+	\label{claseDatosTestClasificacion}
+\end{figure}
+
 
 \subsection{Preprocesado de los datos.}
 
@@ -244,7 +275,7 @@ Como vimos en la introducción del problema, podemos comprobar que efectivamente
 
 \subsection{Modelos a usar.}
 
-\subsection{Hiperparametros y selección del mejor modelo.}
+\subsection{Hiperparámetros y selección del mejor modelo.}
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
 
