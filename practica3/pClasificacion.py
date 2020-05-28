@@ -10,6 +10,13 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import SGDClassifier
+
+from sklearn.model_selection import cross_val_score
+
 np.random.seed(1)
 
 def leer_datos(fichero):
@@ -30,7 +37,7 @@ def leer_datos(fichero):
 
 
 
-datos_tra = "datos/optdigits.tra"
+datos_tra = "datos-/optdigits.tra"
 
 print("Leyendo datos de", datos_tra )
 x, y = leer_datos(datos_tra)
