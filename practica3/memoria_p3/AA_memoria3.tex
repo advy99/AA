@@ -264,8 +264,13 @@ Con respecto al número de datos por clase, en este conjunto también vemos que 
 	\label{claseDatosTestClasificacion}
 \end{figure}
 
+\newpage
 
 \subsection{Preprocesado de los datos.}
+
+Como he comentado con respecto a los datos de este problema, en el repositorio de donde se han extraído los datos nos avisan de que estos ya se encuentran preprocesados, inicialmente los datos eran un bitmap con valores 0 o 1 representado en una matriz de 32 por 32, que se ha preprocesado de forma que se ha dividido en secciones de bitmap 4 por 4 sin solapamiento, es decir, los datos ya preprocesados son una matriz con valores entre 0 y 16 en la que cada posición representa un cuadrante 4 por 4, de ahí que el valor esté entre 0 (el bitmap de la sección no tenia ningún valor como 1) a 16 (todos los valores del bitmap en esa sección 4 por 4 valen 1).
+
+Los valores todos están en un rango fijo que es el mismo para todos (entre 0 y 16), por lo que en principio no va a afectar, por lo que no lo modificaré. Es posible que en esta sección aparezca una nota en la que si finalmente se ha obtenido mejor resultado normalizando los valores entre 0 y 1 se ha aplicado esa transformación a los datos (básicamente consiste en dividir todos los datos por 16 para que se encuentren en el rango [0, 1]).
 
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
 
@@ -274,6 +279,15 @@ Con respecto al número de datos por clase, en este conjunto también vemos que 
 \subsection{Necesidad de regulación.}
 
 \subsection{Modelos a usar.}
+
+
+\subsubsection{Regresión Lineal.}
+
+\subsubsection{Regresión Lineal con regularización (Ridge Regression).}
+
+
+\subsubsection{Gradiente Descendente Estocástico.}
+
 
 \subsection{Hiperparámetros y selección del mejor modelo.}
 
@@ -342,6 +356,13 @@ Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set
 \bibitem{crossval}
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html}
 
+
+
+\bibitem{ridge}
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
+
+\bibitem{sgdclasificacion}
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier}
 
 \bibitem{mlr_crimen}
 Machine Learning Repository: Communities and Crime Data Set  
