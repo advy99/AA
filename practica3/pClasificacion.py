@@ -37,7 +37,7 @@ def leer_datos(fichero):
 
 
 
-datos_tra = "datos-/optdigits.tra"
+datos_tra = "datos/optdigits.tra"
 
 print("Leyendo datos de", datos_tra )
 x, y = leer_datos(datos_tra)
@@ -47,6 +47,33 @@ print("Cada dato del conjunto de datos tiene ", x[0].size, " variables.")
 
 # https://stackoverflow.com/questions/28663856/how-to-count-the-occurrence-of-certain-item-in-an-ndarray-in-python
 unique, contador = np.unique(y, return_counts=True)
+
+# print(contador)
+# print(np.arange(10))
+
+
+# mostramos el número de elementos de cada clase
+plt.title("Recuento de los valores del conjunto de training")
+plt.ylabel("Número de elementos de cada clase")
+plt.xlabel("Posibles clases (0, ..., 9)")
+plt.xticks(np.arange(10))
+plt.bar(np.arange(10), contador, width=0.4)
+
+plt.show()
+
+
+
+# lectura de test
+datos_test = "datos/optdigits.tes"
+
+print("Leyendo datos de", datos_test )
+x_test, y_test = leer_datos(datos_test)
+print("Leidos ", y_test.size, " datos con sus respectivas etiquetas")
+
+print("Cada dato del conjunto de datos tiene ", x_test[0].size, " variables.")
+
+# https://stackoverflow.com/questions/28663856/how-to-count-the-occurrence-of-certain-item-in-an-ndarray-in-python
+unique, contador = np.unique(y_test, return_counts=True)
 
 # print(contador)
 # print(np.arange(10))
