@@ -56,14 +56,9 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
 	print("\n")
 
-	# predecimos training acorde al modelo
-	print("\tPrediciendo las etiquetas dentro de training")
-	y_predecida = clasificador.predict(x).round()
-	# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
-	print("\tObteniendo E_in a partir de la predicción")
-	aciertos = accuracy_score(y, y_predecida)
-	print("\tPorcentaje de aciertos usando en training", aciertos)
-	print("\tE_in: ", 1-aciertos)
+	print("\tEvaluación media de aciertos usando cross-validation: ", resultado_cross_val.mean())
+	print("\tE_in usando cross-validation: ", 1-resultado_cross_val.mean())
+
 
 
 	print("\tPrediciendo las etiquetas en test")
@@ -74,8 +69,6 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	aciertos = accuracy_score(y_test, y_predecida_test)
 	print("\tPorcentaje de aciertos en test: ", aciertos)
 	print("\tE_test: ", 1-aciertos)
-
-	print("\tEvaluación de aciertos usando cross-validation: ", resultado_cross_val.mean())
 
 
 	print("\n\n")
@@ -150,79 +143,81 @@ input("\n--- Pulsar tecla para continuar ---\n")
 # y hecho esto llamamos a la función evaluar con el modelo, los datos y
 # el número de k-folds para cross-validation
 
+kfolds = 10
+
 
 ridgeCsinReg = RidgeClassifier(alpha=0)
 print("Evaluando Ridge Classifier sin regularización:")
-evaluar(ridgeCsinReg, x, y, x_test, y_test, 10)
-
-
-ridgeCReg = RidgeClassifier(alpha=1)
-print("Evaluando Ridge Classifier con regularización 1 (por defecto):")
-evaluar(ridgeCReg, x, y, x_test, y_test, 10)
+evaluar(ridgeCsinReg, x, y, x_test, y_test, kfolds)
 
 ridgeCReg01 = RidgeClassifier(alpha=0.1)
 print("Evaluando Ridge Classifier con regularización 0.1:")
-evaluar(ridgeCReg01, x, y, x_test, y_test, 10)
+evaluar(ridgeCReg01, x, y, x_test, y_test, kfolds)
+
+ridgeCReg = RidgeClassifier(alpha=1)
+print("Evaluando Ridge Classifier con regularización 1 (por defecto):")
+evaluar(ridgeCReg, x, y, x_test, y_test, kfolds)
+
 
 ridgeCReg2 = RidgeClassifier(alpha=2)
 print("Evaluando Ridge Classifier con regularización 2:")
-evaluar(ridgeCReg2, x, y, x_test, y_test, 10)
+evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
 
 
 
 # logiticReg = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
 # print("Evaluando Regresión Logística:")
-# evaluar(logiticReg, x, y, x_test, y_test, 10)
+# evaluar(logiticReg, x, y, x_test, y_test, kfolds)
 #
 # logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
 # print("Evaluando Regresión Logística sin regularización:")
-# evaluar(logiticReg0, x, y, x_test, y_test, 10)
+# evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
 #
 
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje constante 0.01:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.0001, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje constante 0.01 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.0001, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, 10)
+evaluar(SGD, x, y, x_test, y_test, kfolds)
