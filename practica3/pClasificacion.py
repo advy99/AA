@@ -23,6 +23,7 @@ from sklearn.model_selection import cross_val_score
 # metricas
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 
 # para contar tiempos
 import time
@@ -75,6 +76,9 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	print("\n\n")
 	input("\n--- Pulsar tecla para continuar ---\n")
 	print("\n\n")
+
+	# devolvemos E_test
+	return y_predecida_test
 
 
 
@@ -157,7 +161,7 @@ evaluar(ridgeCReg01, x, y, x_test, y_test, kfolds)
 
 ridgeCReg = RidgeClassifier(alpha=1)
 print("Evaluando Ridge Classifier con factor de regularización 1 (por defecto):")
-evaluar(ridgeCReg, x, y, x_test, y_test, kfolds)
+y_pred_test = evaluar(ridgeCReg, x, y, x_test, y_test, kfolds)
 
 
 ridgeCReg2 = RidgeClassifier(alpha=2)
@@ -247,3 +251,9 @@ evaluar(SGD, x, y, x_test, y_test, kfolds)
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, learning_rate='constant', eta0=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
+
+
+print("Matriz de confusión con y_test y los valores predecidos: ")
+print(confusion_matrix(y_test, y_pred_test))
