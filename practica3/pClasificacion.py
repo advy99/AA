@@ -133,11 +133,32 @@ plt.show()
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
-ridgeC = RidgeClassifier()
-print("Evaluando Ridge Classifier:")
-evaluar(ridgeC, x, y, x_test, y_test, 10)
+ridgeCsinReg = RidgeClassifier(alpha=0)
+print("Evaluando Ridge Classifier sin regularización:")
+evaluar(ridgeCsinReg, x, y, x_test, y_test, 10)
 
 
-SGD = SGDClassifier()
+ridgeCReg = RidgeClassifier(alpha=1)
+print("Evaluando Ridge Classifier con regularización 1 (por defecto):")
+evaluar(ridgeCReg, x, y, x_test, y_test, 10)
+
+ridgeCReg01 = RidgeClassifier(alpha=0.1)
+print("Evaluando Ridge Classifier con regularización 0.1:")
+evaluar(ridgeCReg01, x, y, x_test, y_test, 10)
+
+ridgeCReg2 = RidgeClassifier(alpha=2)
+print("Evaluando Ridge Classifier con regularización 2:")
+evaluar(ridgeCReg2, x, y, x_test, y_test, 10)
+
+
+logiticReg = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
+print("Evaluando Regresión Logística:")
+evaluar(logiticReg, x, y, x_test, y_test, 10)
+
+logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
+print("Evaluando Regresión Logística sin regularización:")
+evaluar(logiticReg0, x, y, x_test, y_test, 10)
+
+SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01,)
 print("Evaluando SGD Classifier:")
 evaluar(SGD, x, y, x_test, y_test, 10)
