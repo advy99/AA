@@ -177,6 +177,10 @@ Para esta práctica se pide explicar el proceso a realizar para resolver dos pro
 
 Para esta práctica utilizaré la biblioteca Scikit-Learn\cite{sklearn} ya que cuenta con todas las herramientas que utilizaré y explicaré más adelante. No usé esta herramienta en prácticas anteriores ya que se nos pedía implementar los algoritmos y herramientas, sin embargo para esta práctica nos será más sencillo utilizarla.
 
+\begin{quote}
+\textit{``Que trabajen los romanos que para eso tienen el pecho de lata.''} -  Anónimo.
+\end{quote}
+
 \section{Problema de clasificación.}
 
 \subsection{Comprender el problema. Identificar X, Y y F en el problema.}
@@ -217,7 +221,7 @@ Otra razón es que el problema ya es de gran dimensionalidad, si usamos clases d
 
 El problema ya nos proporciona un conjunto de training y test separado, luego no tendremos que separarlos para este problema.
 
-Para leer los ficheros, al tener el formato de fichero CSV (aunque la extensión no sea CSV), he utilizado la biblioteca pandas, en concreto el método \texttt{read\_csv}.
+Para leer los ficheros, al tener el formato de fichero CSV (aunque la extensión no sea CSV), he utilizado la biblioteca pandas, en concreto el método \texttt{read\_csv}\cite{pandasReadCSV}.
 
 Al leer los ficheros, el conjunto de datos X serán las distintas filas con todas las columnas a excepción de la última y el conjunto de etiquetas serán la última columna de todas las filas.
 
@@ -290,7 +294,7 @@ Debido a que estamos en un problema de clasificación la métrica de evaluación
 
 \subsection{Técnica de ajuste elegida.}
 
-Para realizar el ajuste usaremos la métrica de Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
+Para realizar el ajuste usaremos la métrica usaré Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
 
 Usaremos esta métrica de ajuste ya que es bastante conocida para nosotros y la hemos utilizado en otras prácticas de clasificación en las que hemos usado modelos lineales basados en regresión, además de ser el error usado en la prueba de la que nos habla la descripción del dataset.
 
@@ -758,6 +762,16 @@ Página web de Scikit Learn
 \url{https://scikit-learn.org/stable/user_guide.html}
 
 
+\bibitem{sklearn-linearmodel}
+Scikit-Learn: Modelos lineales
+\url{https://scikit-learn.org/stable/modules/linear_model.html}
+
+
+\bibitem{pandasReadCSV}
+Pandas: read\_csv
+
+\url{https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html}
+
 \bibitem{mlr_digitos}
 Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set 
 
@@ -837,11 +851,32 @@ Machine Learning Repository: Communities and Crime Data Set
 
 \url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}
 
-\bibitem{sklearn-linearmodel}
-Scikit-Learn: Modelos lineales
-\url{https://scikit-learn.org/stable/modules/linear_model.html}
 
 
+
+\bibitem{ridge}
+Scikit-Learn: Ridge Regression
+
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
+
+\bibitem{sgdclasificacion}
+Scikit-Learn: SGD Regression
+
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDRegressor.html#sklearn.linear_model.SGDRegressor}
+
+
+
+\bibitem{sourceRidgeReg}
+Código fuente Ridge Classification Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_ridge.py#L603}
+
+
+
+\bibitem{sourceSGDReg}
+Código fuente SGD para clasificación Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_stochastic_gradient.py#L1354}
 
 
 \end{thebibliography}
