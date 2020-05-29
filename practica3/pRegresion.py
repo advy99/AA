@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # los modelos a usar
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import SGDRegressor
 
@@ -102,8 +102,7 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
 	print("\n")
 
-	print("\tEvaluación media de aciertos usando cross-validation: ", resultado_cross_val.mean())
-	print("\tE_in usando cross-validation: ", 1-resultado_cross_val.mean())
+	print("\tE_in usando cross-validation: ", abs(resultado_cross_val.mean()))
 
 
 
@@ -112,9 +111,8 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	y_predecida_test = clasificador.predict(x_test).round()
 	# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
 	print("\tObteniendo E_test a partir de la predicción")
-	aciertos = mean_absolute_error(y_test, y_predecida_test)
-	print("\tPorcentaje de aciertos en test: ", aciertos)
-	print("\tE_test: ", 1-aciertos)
+	error = mean_absolute_error(y_test, y_predecida_test)
+	print("\tE_test: ", error)
 
 
 	print("\n\n")
@@ -183,6 +181,13 @@ input("\n--- Pulsar tecla para continuar ---\n")
 kfolds = 10
 
 
+
+linReg = LinearRegression()
+print("Evaluando Regresión Lineal:")
+evaluar(linReg, x, y, x_test, y_test, kfolds)
+
+
+
 ridgeCsinReg = Ridge(alpha=0)
 print("Evaluando Ridge Regression con factor de regularización 0 (sin regularización):")
 evaluar(ridgeCsinReg, x, y, x_test, y_test, kfolds)
@@ -203,89 +208,52 @@ evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
 
 
-logiticReg = LogisticRegression(penalty='l2', solver='newton-cg', C=0.001, multi_class='multinomial')
-print("Evaluando Regresión Logística con peso de regularización 0.001:")
-evaluar(logiticReg, x, y, x_test, y_test, kfolds)
-
-logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=1, multi_class='multinomial')
-print("Evaluando Regresión Logística con peso de regularización 1:")
-evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
-
-logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=2, multi_class='multinomial')
-print("Evaluando Regresión Logística con peso de regularización 2:")
-evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
 
 
-
-SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.0001, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y funcion de perdida square loss:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-
-SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y funcion de perdida square loss:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y funcion de perdida square loss:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y funcion de perdida square loss:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-
-
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante 0.01 y función de perdida hinge:")
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje constante 0.01 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 # no podemos evaluar usando un esquema constante con alpha = 0
 
 
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.0001, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida hinge:")
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.0001, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.0001, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-
-
-
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.01, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida hinge:")
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.0001, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 
 
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida hinge:")
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.1, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-
-
-
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida hinge:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
-
-SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida hinge:")
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.01, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 
 
-print("Matriz de confusión con y_test y los valores predecidos: ")
-print(confusion_matrix(y_test, y_pred_test))
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.1, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida squared_loss:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=0.1, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida squared_loss:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
+
+
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=1, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida squared_loss:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=1, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Regressor con tasa de aprendizaje constante y factor de regularización 1 y función de perdida squared_loss:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
