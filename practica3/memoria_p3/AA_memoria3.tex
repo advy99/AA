@@ -646,16 +646,57 @@ Vemos como este modelo, aun variando el factor de regularización, obtenemos aju
 	\label{SGDL001}
 \end{figure}
 
+
+Vemos como en todos los casos con un esquema de tasa de aprendizaje óptimo obtenemos muy buenos resultados que se parecen mucho, los cuales ahora comentaremos.
+
+Con el esquema constante, vemos como el factor de regularización si influye en gran medida, ya que como vemos, con un factor 1 existe demasiada regularización y por lo tanto no llega a ajustar de forma correcta el modelo, dando un error tanto en la muestra como en test bastante alto (del 40\% y 55\% respectivamente), mientras que sin regularizar obtenemos un 8'6\% de error en test, y con la regularización por defecto obtenemos un mejor valor, 5'2\% de error en test, aunque en el primero obtengamos mejor valor del error dentro de la muestra, por lo que podemos ver que la regularización sigue siendo necesaria y evita overfitting en el entrenamiento.
+
+
+\subsubsection{Mejor modelo.}
+
+Escogeré el mejor modelo según el modelo con mejor error en el conjunto de test ya que es el que mejor ha estimado unos datos con los que no ha entrenado. Por este motivo el modelo escogido será Regresión Logística con un factor de regularización $C=1$, por lo que la estimación del error se hará con este modelo.
+
 \newpage
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
 
+Como hemos visto tanto en teoría\cite{teoria} como en la bibliografía de la asignatura\cite{libro}, podemos hacer una estimación del error fuera de la muestra al usar validación cruzada.
+
+Si tenemos $N$ conjuntos de validación, sabemos que:
+
+$$E_{cv} = \frac{1}{N}\sum_{n=1}^{N}{E_{val}(g_n^-)}$$
+
+Y como hemos visto acorde a las curvas de aprendizaje vistas en teoría, sabemos que:
+
+$$E_{out}(g) \leq E_{cv}(g) $$
+
+En realidad $E_{cv}$ es la media de todos los errores al usar la función \texttt{cross\_val\_score}, luego esta estimación se ha hecho para todas las pruebas que hemos realizado y en concreto en el modelo escogido obtenemos que:
+
+$$  E_{out}(g) \leq 0'038$$
+
+Vemos como claramente esto no es así, ya que en el mismo modelo el error en el conjunto de test es mayor (0'0512), y esto puede deberse a que el número de $k$-folds es demasiado alto.
+
+
+
+
 \subsection{Modelo propuesto y estimación del error fuera de la muestra de este modelo.}
 
+Podemos hacer una estimación del error fuera de la muestra usando el conjunto de test. En el modelo que hemos escogido vemos como esta estimación se de un error del 5'12\%.
 
+Esto lo podemos comprobar mostrando la matriz de confusión.
 
+Esta matriz hará un recuento de los datos reales y predecidos. En las filas se muestra el valor real de la clase, y el las columnas el valor predecido por nuestro modelo, de forma que si el valor real es un 0 y el modelo ha predecido un 7, sumará uno en la posición 0,7. 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/matrizC.png}
+	\caption{Matriz de confusión con los datos predecidos del modelo seleccionado.}
+	\label{MC}
+\end{figure}
 
+El que en esta matriz se muestre la diagonal con los números mayores quiere decir que la mayor parte del conjunto de test ha realizado una buena predicción, mientras que en las posiciones  fuera de la diagonal ha cometido error. Vemos como principalmente comete errores al clasificar el número 8, que lo suele confundir con un 1 (imagino que al ser ambos bastante similares, ser simétricos y estar por la zona central de la imagen) y con un 9 (al compartir la misma zona de la imagen y solo diferenciarse en un cuadrante de la imagen).
+
+Aun así, hemos obtenido muy buenos resultados para ser un problema con gran número de variables y tener gran cantidad de clases.
 
 \newpage
 
@@ -704,6 +745,12 @@ Vemos como este modelo, aun variando el factor de regularización, obtenemos aju
 
 \begin{thebibliography}{9}
 
+
+\bibitem{teoria}
+Diapositivas de teoría
+
+\bibitem{libro}
+Learning From Data by Yaser S. Abu-Mostafa, Malik Magdon-Ismail, Hsuan-Tien Lin
 
 \bibitem{sklearn}
 Página web de Scikit Learn
