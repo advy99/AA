@@ -51,6 +51,7 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	clasificador.fit(x,y)
 	# aplicamos validación cruzada una vez tenemos el modelo ajustado
 	print("\tAplicando", cv, "-k-folds cross-validation")
+	# usamos de metrica la tasa de aciertos (accuracy)
 	resultado_cross_val = cross_val_score(clasificador, x, y, scoring='accuracy', cv=cv)
 	fin = time.time()
 	print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
@@ -147,55 +148,54 @@ kfolds = 10
 
 
 ridgeCsinReg = RidgeClassifier(alpha=0)
-print("Evaluando Ridge Classifier sin regularización:")
+print("Evaluando Ridge Classifier con factor de regularización 0 (sin regularización):")
 evaluar(ridgeCsinReg, x, y, x_test, y_test, kfolds)
 
 ridgeCReg01 = RidgeClassifier(alpha=0.1)
-print("Evaluando Ridge Classifier con regularización 0.1:")
+print("Evaluando Ridge Classifier con factor de regularización 0.1:")
 evaluar(ridgeCReg01, x, y, x_test, y_test, kfolds)
 
 ridgeCReg = RidgeClassifier(alpha=1)
-print("Evaluando Ridge Classifier con regularización 1 (por defecto):")
+print("Evaluando Ridge Classifier con factor de regularización 1 (por defecto):")
 evaluar(ridgeCReg, x, y, x_test, y_test, kfolds)
 
 
 ridgeCReg2 = RidgeClassifier(alpha=2)
-print("Evaluando Ridge Classifier con regularización 2:")
+print("Evaluando Ridge Classifier con factor de regularización 2:")
 evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
 
 
 
-# logiticReg = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
-# print("Evaluando Regresión Logística:")
-# evaluar(logiticReg, x, y, x_test, y_test, kfolds)
-#
-# logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=1)
-# print("Evaluando Regresión Logística sin regularización:")
-# evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
-#
+logiticReg = LogisticRegression(penalty='l2', solver='newton-cg', C=0.001, multi_class='multinomial')
+print("Evaluando Regresión Logística con peso de regularización 0.001:")
+evaluar(logiticReg, x, y, x_test, y_test, kfolds)
 
+logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=1, multi_class='multinomial')
+print("Evaluando Regresión Logística con peso de regularización 1:")
+evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
 
-SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0, learning_rate='constant', eta0=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje constante 0.01:")
-evaluar(SGD, x, y, x_test, y_test, kfolds)
+logiticReg0 = LogisticRegression(penalty='l2', solver='newton-cg', C=2, multi_class='multinomial')
+print("Evaluando Regresión Logística con peso de regularización 2:")
+evaluar(logiticReg0, x, y, x_test, y_test, kfolds)
+
 
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.0001, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001:")
+print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y funcion de perdida square loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.01, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01:")
+print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y funcion de perdida square loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=0.1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1:")
+print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y funcion de perdida square loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 SGD = SGDClassifier(loss='squared_loss', penalty='l2', alpha=1, max_iter=5000)
-print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1:")
+print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y funcion de perdida square loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
@@ -204,20 +204,46 @@ SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0, learning_rate='constant
 print("Evaluando SGD Classifier con tasa de aprendizaje constante 0.01 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
+# no podemos evaluar usando un esquema constante con alpha = 0
+
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.0001, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.0001, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida hinge:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
 
 
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.01, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
+SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.01, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida hinge:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
+
+
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
+SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=0.1, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida hinge:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
+
+
 SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, max_iter=5000)
 print("Evaluando SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida hinge:")
+evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+SGD = SGDClassifier(loss='hinge', penalty='l2', alpha=1, learning_rate='constant', eta0=0.01, max_iter=5000)
+print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida hinge:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
