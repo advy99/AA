@@ -13,7 +13,6 @@ import pandas as pd
 
 # los modelos a usar
 from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import RidgeClassifier
 from sklearn.linear_model import SGDClassifier
 
