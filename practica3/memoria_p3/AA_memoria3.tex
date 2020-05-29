@@ -217,6 +217,10 @@ Otra razón es que el problema ya es de gran dimensionalidad, si usamos clases d
 
 El problema ya nos proporciona un conjunto de training y test separado, luego no tendremos que separarlos para este problema.
 
+Para leer los ficheros, al tener el formato de fichero CSV (aunque la extensión no sea CSV), he utilizado la biblioteca pandas, en concreto el método \texttt{read\_csv}.
+
+Al leer los ficheros, el conjunto de datos X serán las distintas filas con todas las columnas a excepción de la última y el conjunto de etiquetas serán la última columna de todas las filas.
+
 \subsubsection{Conjunto de training}
 
 Tras leer los ficheros dados de training podemos comprobar los datos del problema. En este caso el conjunto dado de training cuenta con 3823 datos y como vimos en la introducción del problema, podemos comprobar que efectivamente cada dato tiene 64 variables:
@@ -282,6 +286,8 @@ En este apartado fijaremos la métrica que usaremos para la evaluación, es deci
 
 Debido a que estamos en un problema de clasificación la métrica de evaluación será la tasa de aciertos, es decir, la tasa de datos que asigna la etiqueta correcta. He hecho esta elección ya que no nos interesa saber un valor numérico sobre cuanto se ha equivocado, si no si es capaz de clasificar los puntos bien.
 
+
+
 \subsection{Técnica de ajuste elegida.}
 
 Para realizar el ajuste usaremos la métrica de Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
@@ -293,13 +299,17 @@ $$ \frac{1}{N} \sum_{i=1}^{N}{(y_i - \hat{y}_i)^2} $$
 
 Siendo $y_i$ la clase real del dato e $\hat{y}_i$ la clase predecida por el modelo.
 
-\subsection{Necesidad de regulación.}
+Tras realizar diversos experimentos que comentaré más adelante en la selección de hiperparámetros, usando la métrica de mínimos cuadrados en gradiente descendente estocástico obtenemos muy malos resultados, por este motivo usaré también la métrica Hinge\cite{hingeLoss}.
+
+Esta métrica consiste en obtener un Support Vector Machine lineal, que nos definirá la función de perdida y el vector de pesos se verá modificado acorde a dicho SVM.
+
+\subsection{Necesidad de regularización.}
 
 La regularización es necesaria para evitar el overfitting al entrenar el modelo. La idea de utilizar regularización es minimizar el cambio en la función de error, para obligar a que no se ajuste de forma perfecta a los datos. Esta técnica nos será útil especialmente cuando los datos contienen ruido, como es nuestro caso.
 
 Debido a la alta dimensionalidad de los datos, a pesar de no utilizar un conjunto de clases de funciones complejos, es posible que se genere overfitting, aunque no lo sabemos a priori, por este motivo en los modelos a usar que explicaré más adelante probaré a utilizar los distintos modelos con y sin regularización.
 
-En principio si es necesaria esta regularización, sin embargo voy a realizar estos experimentos para demostrar su importancia.
+En principio si es necesaria esta regularización, sin embargo voy a realizar distintos experimentos para comprobar su importancia.
 
 Para aplicar la regularización existen dos normas\cite{l1l2regularizacion}.
 
@@ -319,24 +329,330 @@ $$ \lambda \sum_{j=1}^{p}{\beta_j^2} $$
 
 En este problema utilizaremos la norma L2 ya que es la más similar a la métrica de ajuste usada. En caso de que al realizar pruebas y comprobar que la norma L1 se comporta mejor, modificaré esta sección explicando el cambio (si se llega a producir).
 
+\newpage
 
 \subsection{Modelos a usar.}
 
+En esta sección comentaré los modelos lineales a usar para intentar resolver el problema.
 
-\subsubsection{Regresión Lineal.}
+Usaré Regresión Lineal con regularización, Regresión Logística y Gradiente Descendente Estocástico. Usaré la implementación dada en Scikit-Learn\cite{scikitlearnlinearmodels}, y comentaré como funcionan, aunque son los algoritmos vistos en prácticas anteriores por los que ya los conocemos.
 
-\subsubsection{Regresión Lineal con regularización (Ridge Regression).}
+He decidido no usar el modelo Perceptron ya que, como he comentado, los datos pueden contener ruido y no ser linealmente separables, aun así podría haber usado el modelo PLA-Pocket, sin embargo considero que estudiando el comportamiento en los cuatro modelos mencionados no es necesario añadir este, así como tampoco usar Regresión Lineal, ya que la he sustituido por la versión con regularización al poder adaptar la regularización a través de sus hiperparámetros, y en caso de no querer regularizar simplemente el parámetro del peso de la regularización será 0.
+
+
+\subsubsection{Clasificación Ridge.}
+
+Este modelo es una variación de la Regresión Lineal pero teniendo en cuenta la regularización. En concreto usa la norma L2. Como podemos ver en su código fuente\cite{sourceRidge}, se trata del modelo anterior teniendo en cuenta dicha norma.
+
+Aunque en principio se trata de una variación de Regresión Lineal, cuenta con una variación para clasificación que es la citada en esta memoria, y que usaremos para este problema al ser de clasificación. Esta variación simplemente convierte las etiquetas en valores 1 o -1 y aplica el método de regresión. Para problemas multiclase como es el nuestro, automáticamente  aplicará $n$ veces el algoritmo siendo $n$ el número de clases, de forma que cada ejecución el valor 1 será una clase y el valor -1 las clases restantes.
+
 
 \subsubsection{Regresión Logística.}
 
+En este caso este modelo es el visto en otras prácticas y en teoría, pero con la diferencia de que al usar los recursos de Scikit-Learn\cite{sourceLogistic} tienen en cuenta un mayor número de hiperparámetros que nosotros no tuvimos en cuenta, los cuales discutiré más adelante.
+
 \subsubsection{Gradiente Descendente Estocástico.}
 
+De nuevo, este modelo es el visto en la asignatura, sin embargo Scikit-Learn cuenta con dos variantes, una para clasificación y otra para regresión. En este problema, al tratarse de clasificación, usaremos la variante de clasificación\cite{sourceSGDClas}.
+
+
+\newpage
 
 \subsection{Hiperparámetros y selección del mejor modelo.}
+
+En esta sección discutiré los hiperparámetros de cada algoritmo, así como cuales considero los mejores para cada uno, y finalmente el modelo que mejor se comportan en nuestro problema.
+
+Para realizar las ejecuciones, como he comentado, usaré Scikit-Learn. Para realizar una ejecución tiene distintos pasos:
+
+\begin{enumerate}
+	\item Declaración del modelo a utilizar. Debemos crear una variable que tendrá un objeto de la clase del modelo a utilizar, en la creación de este objeto será cuando especificaremos los hiperparámetros del modelo.
+	\item Ajustar el modelo haciendo uso del método fit de la clase de dicho modelo. Se encargará de estimar el modelo.
+	\item Calcular el error dentro de la muestra usando validación cruzada. Esto lo haremos haciendo uso del método \texttt{cross\_val\_score}.
+	\item Predecir las etiquetas del conjunto de test.
+	\item Calcular el error en el conjunto de test.
+\end{enumerate}
+
+Un ejemplo sería:
+
+\begin{lstlisting}
+estimador = ClaseEstimador(hiperparametros)
+print("\tAjustando el modelo")
+estimador.fit(x,y)
+# aplicamos validación cruzada una vez tenemos el modelo ajustado
+print("\tAplicando", cv, "-k-folds cross-validation")
+# usamos de metrica la tasa de aciertos (accuracy)
+resultado_cross_val = cross_val_score(estimador, x, y, scoring='accuracy', cv=cv)
+fin = time.time()
+print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
+print("\n")
+print("\tEvaluación media de aciertos usando cross-validation: ", resultado_cross_val.mean())
+print("\tE_in usando cross-validation: ", 1-resultado_cross_val.mean())
+
+print("\tPrediciendo las etiquetas en test")
+# predecimos test acorde al modelo
+y_predecida_test = clasificador.predict(x_test).round()
+# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
+print("\tObteniendo E_test a partir de la predicción")
+aciertos = accuracy_score(y_test, y_predecida_test)
+print("\tPorcentaje de aciertos en test: ", aciertos)
+print("\tE_test: ", 1-aciertos)
+\end{lstlisting}
+
+Ya que la única diferencia entre usar un modelo u otro es la primera linea, y además fijamos los hiperparámetros, lo he separado en una función donde le pasamos el estimador:
+
+\begin{lstlisting}
+estimador = ClaseEstimador(hiperparametros)
+evaluar(estimador, x, y, x_test, x_test, num_kfolds)
+\end{lstlisting}
+
+\subsubsection{Clasificación Ridge.}
+
+En este modelo, aunque ofrece gran cantidad de parámetros para controlar su funcionamiento, nos vamos a centrar en tres:
+
+\begin{enumerate}
+	\item alpha: Factor por el que se multiplica el método de regularización, en este caso la norma L2 aplicada por defecto. Este parámetro por defecto tiene valor 1.
+	\item max\_iter: Máximo número de iteraciones del algoritmo. Por defecto no tiene límite de iteraciones.
+	\item tol: Precisión de la solución. Por defecto $1^{-3}$.
+\end{enumerate}
+
+
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{ridge}.
+
+
+Para este modelo no modificaré la precisión de la solución ya que es bastante baja ni el máximo de iteraciones ya que no consume un tiempo considerable.
+
+El factor que si modificaré será el factor que multiplica al método de regularización. He realizado pruebas con valores 0 (sin regularización), 0.1, 1 (valor por defecto) y 2, obteniendo estos resultados:
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/ridge0.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier sin regularización.}
+	\label{ridge0}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/ridge01.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 0.1.}
+	\label{ridge01}
+\end{figure}
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/ridge1.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 1.}
+	\label{ridge1}
+\end{figure}
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/ridge2.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 2.}
+	\label{ridge2}
+\end{figure}
+
+
+En principio, viendo los resultados, vemos como este algoritmo se comporta muy bien, dando una tasa de error muy baja.
+
+En este algoritmo podemos ver como el uso de regularización es notable, y es que en el modelo en el que no se aplicaba regularización, aunque el error dentro de la muestra es menor, el error en el conjunto de test es mayor que en los ajustes en los que se ha aplicado regularización, lo que nos da señales de overfitting, aunque es muy leve y aun sin regularización obtenemos buenos resultados.
+
+
+\newpage
+
+\subsubsection{Regresión Logística.}
+
+Para este modelo estos serán los hiperparámetros que utilizaré:
+
+\begin{enumerate}
+	\item solver: Se trata del algoritmo a utilizar para el problema de optimización.
+	\item penalty: Penalización para el ajuste, es decir, la regularización, puede tomar valores L1 o L2. 
+	\item multi\_class: Indicar si el problema es multiclase.
+	\item max\_iter: Máximo número de iteraciones para el algoritmo.
+	\item C: Inversa del factor de regularización.
+\end{enumerate}
+
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{logisticregression}.
+
+
+En principio utilizaré el solver newtown-cg ya que es el recomendado por la documentación y funciona bastante bien como veremos.
+
+Como ya hemos comentado, para la regularización usaré la norma L2.
+
+Nuestro problema es multiclase, luego en el atributo multi\_class tendrá el valor multinomial.
+
+Con respecto al máximo de iteraciones, he mantenido el número por defecto (100 iteraciones) ya que no son necesarias más (en caso de que se quede sin iteraciones scikit-learn nos mostraría un aviso por pantalla, que como veremos no hace).
+
+Por último, el parámetro con el que realizaré varios experimentos, C. Este parámetro no es como en el modelo anterior, el peso de la regularización, si no la inversa, por lo que valores cercanos a cero serán una regularización mayor, y con valores mayores será una regularización menor. Este valor no puede ser cero.
+
+Realizaré el ajuste para valores 0.001, 1 y 2:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/logistic0001.png}
+	\caption{Resultado usando el algoritmo Regresión Logística con factor de regularización 0.001.}
+	\label{LR001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/logistic1.png}
+	\caption{Resultado usando el algoritmo Regresión Logística con factor de regularización 1.}
+	\label{LR1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.3]{clasificacion/logistic2.png}
+	\caption{Resultado usando el algoritmo Regresión Logística con factor de regularización 2.}
+	\label{LR2}
+\end{figure}
+
+Vemos como en este caso nos encontramos con un error en el conjunto de test menor para $C=1$, esto se debe a que con $C=0.001$ el peso de la regularización es demasiado alto, mientras que con $C=2$ es demasiado bajo, teniendo problemas de infraajuste en el primer caso y de overffiting en el segundo. Aun así, estos no son problemas grandes ni de gran importancia ya que como vemos aun así el ajuste es muy bueno.
+
+Comentar también que en el caso de $C=2$ vemos como recibimos el aviso de que una de las 10 iteraciones de validación cruzada se ha quedado sin iteraciones, esto se debe a que en realidad está usando un número de iteraciones muy cercano al límite ya que vemos que en este problema los tiempos son mucho más altos.
+
+\newpage
+
+\subsubsection{Gradiente Descendente Estocástico.}
+
+En Gradiente Descendente Estocástico tenemos los siguientes parámetros cruciales:
+
+\begin{enumerate}
+	\item loss: Función de perdida. Por defecto 'hinge'.
+	\item penalty: Termino de regularización. Por defecto la norma L2.
+	\item alpha: Constante multiplicadora de la regularización. Por defecto 0.0001. Con un mayor valor, mayor será la regularización.
+	\item learning\_rate: Esquema para la tasa aprendizaje. Por defecto optimo, siguiendo la siguiente formula $eta = \frac{1}{alpha \cdot (t + t_0)}$ donde $t_0$ es una heurística propuesta por Leon Bottou. Como podemos ver, si el esquema es el esquema óptimo el parámetro alpha debe ser distinto a 0.
+	\item eta0: Valor de la tasa de aprendizaje en caso de utilizar un esquema constante. No es usado en el esquema óptimo.
+	\item max\_iter: Máximo de iteraciones del algoritmo.
+\end{enumerate}
+
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{sgdclasificacion}.
+
+Para la función de perdida usaremos square\_loss, sin embargo, como comentamos y veremos ahora, esta función de perdida se comporta muy mal, luego también ejecutaremos el algoritmo con la función de perdida Hinge.
+
+Para el termino de regularización, como hemos hecho con todos los modelos, usaremos la norma L2.
+
+El parámetro alpha discutiremos más adelante cual será el mejor valor, y realizaré pruebas con valores 0, 0.0001, 0.01, 0.1 y 1.
+
+Para el esquema de la tasa de aprendizaje realizaremos las pruebas con dos esquemas, el constante y el óptimo. Las pruebas con alpha con valor 0 solo las haré con el esquema constante ya que con el óptimo es necesario para calcular el valor de la tasa de aprendizaje.
+
+Como nota añadir que haciendo el experimento con la función de perdida square\_loss obtenemos malos resultados siempre y voy a desechar ese modelo por sus malos resultados, así que la comparación entre el esquema constante y el óptimo será con la función de perdida Hinge.
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdLoss0001.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.001 y función de perdida square loss.}
+	\label{SGDL0001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdLoss001.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.01 y función de perdida square loss.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdLoss01.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.1 y función de perdida square loss.}
+	\label{SGDL01}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdLoss1.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 1 y función de perdida square loss.}
+	\label{SGDL1}
+\end{figure}
+
+\newpage
+
+Vemos como este modelo, aun variando el factor de regularización, obtenemos ajustes muy malos. A continuación probamos con la función de perdida Hinge:
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH001a0.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante 0.01, sin regularización y función de perdida Hinge.}
+	\label{SGDL0}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH00001.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida Hinge.}
+	\label{SGDL00001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH00001c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida Hinge.}
+	\label{SGDL00001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH001.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH001c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH01.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH01c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH1.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{clasificacion/sgdH1c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\newpage
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
 
 \subsection{Modelo propuesto y estimación del error fuera de la muestra de este modelo.}
+
+
 
 
 
@@ -369,7 +685,7 @@ En este problema utilizaremos la norma L2 ya que es la más similar a la métric
 
 \subsection{Técnica de ajuste elegida.}
 
-\subsection{Necesidad de regulación.}
+\subsection{Necesidad de regularización.}
 
 \subsection{Modelos a usar.}
 
@@ -391,6 +707,7 @@ En este problema utilizaremos la norma L2 ya que es la más similar a la métric
 
 \bibitem{sklearn}
 Página web de Scikit Learn
+
 \url{https://scikit-learn.org/stable/user_guide.html}
 
 
@@ -401,23 +718,71 @@ Machine Learning Repository: Optical Recognition of Handwritten Digits Data Set
 
 
 \bibitem{crossval}
+Scikit-Learn: Cross-validation:
+
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html}
 
 
 
 \bibitem{ridge}
-\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
+Scikit-Learn: Clasificador Ridge
+
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RidgeClassifier.html#sklearn.linear_model.RidgeClassifier}
 
 \bibitem{logisticregression}
+Scikit-Learn: Regresión Logística
+
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression}
 
 \bibitem{sgdclasificacion}
+Scikit-Learn: Clasificador SGD 
+
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier}
+
 
 \bibitem{l1l2regularizacion}
 Métodos de regularización: Norma L1 y L2:
 
 \url{https://towardsdatascience.com/l1-and-l2-regularization-methods-ce25e7fc831c}
+
+
+\bibitem{scikitlearnlinearmodels}
+Scikit-Learn: Linear Models
+
+\url{https://scikit-learn.org/stable/modules/linear_model.html}
+
+
+\bibitem{sourceRidge}
+Código fuente Ridge Classification Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_ridge.py#L765}
+
+
+
+\bibitem{sourceLogistic}
+Código fuente Logistic Regression Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_logistic.py#L1011}
+
+
+
+\bibitem{sourceSGDClas}
+Código fuente SGD para clasificación Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_stochastic_gradient.py#L731}
+
+
+
+\bibitem{scoring-cross-val}
+Scikit-Learn: Métricas para la validación cruzada
+
+\url{https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter}
+
+
+\bibitem{hingeLoss}
+Función de perdida Hinge:
+
+\url{https://en.wikipedia.org/wiki/Hinge_loss}
 
 
 \bibitem{mlr_crimen}
@@ -426,10 +791,11 @@ Machine Learning Repository: Communities and Crime Data Set
 \url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}
 
 \bibitem{sklearn-linearmodel}
+Scikit-Learn: Modelos lineales
 \url{https://scikit-learn.org/stable/modules/linear_model.html}
 
-\bibitem{sklearn-model-selection}
-\url{https://scikit-learn.org/stable/modules/classes.html#module-sklearn.model_selection}
+
+
 
 \end{thebibliography}
 
