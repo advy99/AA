@@ -8,14 +8,21 @@ Nombre Estudiante: Antonio David Villegas
 import numpy as np
 import matplotlib.pyplot as plt
 
+# pandas para leer el csv
 import pandas as pd
 
-
+# los modelos a usar
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import RidgeClassifier
 from sklearn.linear_model import SGDClassifier
 
+# para hacer validación cruzada
 from sklearn.model_selection import cross_val_score
+
+# metricas
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import accuracy_score
 
 np.random.seed(1)
 
@@ -87,3 +94,36 @@ plt.xticks(np.arange(10))
 plt.bar(np.arange(10), contador, width=0.4)
 
 plt.show()
+
+ridgeC = RidgeClassifier()
+# ajustamos el modelo
+ridgeC.fit(x,y)
+# aplicamos validación cruzada
+resultado_regresion_lineal = cross_val_score(ridgeC, x, y, scoring='neg_mean_squared_error', cv=10)
+
+
+# predecimos test acorde al modelo
+y_predecida = ridgeC.predict(x_test).round()
+
+# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
+aciertos = accuracy_score(y_test, y_predecida)
+
+print("Porcentaje de aciertos usando Ridge: ", aciertos)
+
+
+
+
+SGD = SGDClassifier()
+# ajustamos el modelo
+SGD.fit(x,y)
+# aplicamos validación cruzada
+resultado_regresion_lineal = cross_val_score(SGD, x, y, scoring='neg_mean_squared_error', cv=10)
+
+
+# predecimos test acorde al modelo
+y_predecida = SGD.predict(x_test).round()
+
+# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
+aciertos = accuracy_score(y_test, y_predecida)
+
+print("Porcentaje de aciertos usando SGD: ", aciertos)
