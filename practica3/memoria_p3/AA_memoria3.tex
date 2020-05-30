@@ -662,6 +662,8 @@ Con el esquema constante, vemos como el factor de regularización si influye en 
 
 Escogeré el mejor modelo según el modelo con mejor error en el conjunto de test ya que es el que mejor ha estimado unos datos con los que no ha entrenado. Por este motivo el modelo escogido será Regresión Logística con un factor de regularización $C=1$, por lo que la estimación del error se hará con este modelo.
 
+Como conclusión también añadir que a pesar de ser necesaria la regularización, no se ha notado apenas su uso debido a que no hay gran overfitting al usar clases de funciones muy simples, aunque la dimensionalidad del problema sea alta. 
+
 \newpage
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
@@ -833,7 +835,7 @@ Finalmente, al eliminar los atributos con muchos valores perdidos obtenemos que 
 En este apartado fijaremos la métrica que usaremos para la evaluación, es decir, la métrica que utilizaremos para calcular el error del modelo una vez esté entrenado, es decir, saber como bien se comporta. Esto no quiere decir que la métrica que usará el modelo para entrenarse sea obligatoriamente esta, aunque en este problema si que lo será.
 
 
-Debido a que estamos en un problema de regresión la métrica de evaluación será el error cuadrático medio, es decir, que a mayor distancia de los datos con nuestro ajuste, mayor será el error.
+Debido a que estamos en un problema de regresión la métrica de evaluación será el error cuadrático medio\cite{meanSquareError}, es decir, que a mayor distancia de los datos con nuestro ajuste, mayor será el error.
 
 He escogido esta métrica ya que es simple, como hemos visto en teoría, prácticas y la bibliografía es muy usada y como hemos comprobado en otras prácticas y veremos más adelante se comporta de forma adecuada, al estar ante un problema de regresión intentando estimar valores numéricos decimales.
 
@@ -908,43 +910,7 @@ De nuevo, este modelo es el visto en la asignatura, sin embargo Scikit-Learn cue
 
 En esta sección discutiré los hiperparámetros de cada algoritmo, así como cuales considero los mejores para cada uno, y finalmente el modelo que mejor se comportan en nuestro problema.
 
-Para realizar las ejecuciones, como he comentado, usaré Scikit-Learn. Para realizar una ejecución tiene distintos pasos:
-
-\begin{enumerate}
-	\item Declaración del modelo a utilizar. Debemos crear una variable que tendrá un objeto de la clase del modelo a utilizar, en la creación de este objeto será cuando especificaremos los hiperparámetros del modelo.
-	\item Ajustar el modelo haciendo uso del método fit de la clase de dicho modelo. Se encargará de estimar el modelo.
-	\item Calcular el error dentro de la muestra usando validación cruzada. Esto lo haremos haciendo uso del método \texttt{cross\_val\_score}.
-	\item Predecir las etiquetas del conjunto de test.
-	\item Calcular el error en el conjunto de test.
-\end{enumerate}
-
-Un ejemplo sería:
-
-\begin{lstlisting}
-estimador = ClaseEstimador(hiperparametros)
-print("\tAjustando el modelo")
-estimador.fit(x,y)
-# aplicamos validación cruzada una vez tenemos el modelo ajustado
-print("\tAplicando", cv, "-k-folds cross-validation")
-# usamos de metrica la tasa de aciertos (accuracy)
-resultado_cross_val = cross_val_score(estimador, x, y, scoring='accuracy', cv=cv)
-fin = time.time()
-print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
-print("\n")
-print("\tEvaluación media de aciertos usando cross-validation: ", resultado_cross_val.mean())
-print("\tE_in usando cross-validation: ", 1-resultado_cross_val.mean())
-
-print("\tPrediciendo las etiquetas en test")
-# predecimos test acorde al modelo
-y_predecida_test = clasificador.predict(x_test).round()
-# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
-print("\tObteniendo E_test a partir de la predicción")
-aciertos = accuracy_score(y_test, y_predecida_test)
-print("\tPorcentaje de aciertos en test: ", aciertos)
-print("\tE_test: ", 1-aciertos)
-\end{lstlisting}
-
-Ya que la única diferencia entre usar un modelo u otro es la primera linea, y además fijamos los hiperparámetros, lo he separado en una función donde le pasamos el estimador:
+Las ejecuciones se hacen de igual forma que en el problema anterior, luego reutilizaré la función usada:
 
 \begin{lstlisting}
 estimador = ClaseEstimador(hiperparametros)
@@ -954,6 +920,20 @@ evaluar(estimador, x, y, x_test, x_test, num_kfolds)
 
 \subsubsection{Regresión Lineal}
 
+Este modelo, como podemos ver en en la web de Scikit-Learn\cite{linearReg} es muy básico y no tenemos parámetros para realizar el ajuste, luego simplemente lo ejecutamos, obteniendo el siguiente resultado:
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/regLin.png}
+	\caption{Resultado usando el algoritmo Regresión Lineal.}
+	\label{ridge0}
+\end{figure}
+
+
+Con la única ejecución de este algoritmo podemos ver como el error dentro de la muestra es muy bajo, del 1'8\%, mientras que el error en el conjunto de test es del 7'02\%. Vemos como el modelo se comporta bien fuera de la muestra incluso sin regularización, vemos si esto lo podemos mejorar aplicando dicha regularización.
+
+\newpage
 
 \subsubsection{Regresión Ridge.}
 
@@ -966,7 +946,7 @@ En este modelo, aunque ofrece gran cantidad de parámetros para controlar su fun
 \end{enumerate}
 
 
-Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{ridge}.
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{ridgeReg}.
 
 
 Para este modelo no modificaré la precisión de la solución ya que es bastante baja ni el máximo de iteraciones ya que no consume un tiempo considerable.
@@ -978,7 +958,7 @@ El factor que si modificaré será el factor que multiplica al método de regula
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.45]{regresion/ridge0.png}
-	\caption{Resultado usando el algoritmo Ridge Classifier sin regularización.}
+	\caption{Resultado usando el algoritmo Ridge Regression sin regularización.}
 	\label{ridge0}
 \end{figure}
 
@@ -986,8 +966,8 @@ El factor que si modificaré será el factor que multiplica al método de regula
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.45]{regresion/ridge01.png}
-	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 0.1.}
-	\label{ridge01}
+	\caption{Resultado usando el algoritmo Ridge Regression con factor de regularización 0.1.}
+	\label{ridgereg01}
 \end{figure}
 
 
@@ -995,8 +975,8 @@ El factor que si modificaré será el factor que multiplica al método de regula
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.45]{regresion/ridge1.png}
-	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 1.}
-	\label{ridge1}
+	\caption{Resultado usando el algoritmo Ridge Regression con factor de regularización 1.}
+	\label{ridgereg1}
 \end{figure}
 
 
@@ -1004,15 +984,25 @@ El factor que si modificaré será el factor que multiplica al método de regula
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.45]{regresion/ridge2.png}
-	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 2.}
-	\label{ridge2}
+	\caption{Resultado usando el algoritmo Ridge Regression con factor de regularización 2.}
+	\label{ridgereg2}
 \end{figure}
 
 
-En principio, viendo los resultados, vemos como este algoritmo se comporta muy bien, dando una tasa de error muy baja.
+En principio, viendo los resultados, vemos como este algoritmo se comporta bien, aunque con el mismo problema que Regresión Lineal, tiene una tasa de error muy baja dentro de la muestra pero bastante mayor en el conjunto de test, aún aplicando la regularización.
 
-En este algoritmo podemos ver como el uso de regularización es notable, y es que en el modelo en el que no se aplicaba regularización, aunque el error dentro de la muestra es menor, el error en el conjunto de test es mayor que en los ajustes en los que se ha aplicado regularización, lo que nos da señales de overfitting, aunque es muy leve y aun sin regularización obtenemos buenos resultados.
+Debido a que al aplicar una mayor regularización (usando un factor 2) obtenemos mejores resultados en test, he añadido el siguiente experimento con factor 3:
 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/ridge3.png}
+	\caption{Resultado usando el algoritmo Ridge Regression con factor de regularización 3.}
+	\label{ridgereg3}
+\end{figure}
+
+
+Vemos como volvemos a tener peor resultado en el error en test, 
 
 \newpage
 
@@ -1304,12 +1294,12 @@ Machine Learning Repository: Communities and Crime Data Set
 \url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}
 
 
-\bibitem{linearRed}
+\bibitem{linearReg}
 Scikit-Learn: Regresión Lineal
 
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression}
 
-\bibitem{ridge}
+\bibitem{ridgeReg}
 Scikit-Learn: Ridge Regression
 
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
@@ -1355,6 +1345,11 @@ NumPy: delete
 
 \url{https://numpy.org/doc/stable/reference/generated/numpy.delete.html}
 
+
+\bibitem{meanSquareError}
+Scikit-Learn: Métrica error cuadrático medio.
+
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html#sklearn.metrics.mean_squared_error}
 
 \end{thebibliography}
 
