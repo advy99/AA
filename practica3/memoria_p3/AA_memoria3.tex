@@ -284,6 +284,8 @@ Los valores todos están en un rango fijo que es el mismo para todos (entre 0 y 
 
 Además de este motivo, no voy a realizar preprocesado de datos ya que en la información del dataset se nos informa de que con ese preprocesado los datos se comportan de manera correcta, es decir, que en principio no debería haber problemas, aun así si observo que no logramos unos resultados adecuados ampliaré esta sección para intentar aplicar un preprocesado que nos mejore los resultados.
 
+Tras realizar pruebas he decidido mantenerme en la misma posición ya que con esta se obtienen resultados muy buenos, y aplicando algún tipo de preprocesado como por ejemplo normalización entre 0 y 1 de los valores se empeora los resultados.
+
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
 
 En este apartado fijaremos la métrica que usaremos para la evaluación, es decir, la métrica que utilizaremos para calcular el error del modelo una vez esté entrenado, es decir, saber como bien se comporta. Esto no quiere decir que la métrica que usará el modelo para entrenarse sea esta, ya que como veremos usaremos una distinta, lo cual justificaré más adelante.
@@ -294,7 +296,7 @@ Debido a que estamos en un problema de clasificación la métrica de evaluación
 
 \subsection{Técnica de ajuste elegida.}
 
-Para realizar el ajuste usaremos la métrica usaré Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
+Para realizar el ajuste usaremos la métrica Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión (aunque algunos sean variaciones para clasificación, en realidad usan regresión), luego no podemos usar la métrica para la evaluación escogida. 
 
 Usaremos esta métrica de ajuste ya que es bastante conocida para nosotros y la hemos utilizado en otras prácticas de clasificación en las que hemos usado modelos lineales basados en regresión, además de ser el error usado en la prueba de la que nos habla la descripción del dataset.
 
@@ -303,7 +305,7 @@ $$ \frac{1}{N} \sum_{i=1}^{N}{(y_i - \hat{y}_i)^2} $$
 
 Siendo $y_i$ la clase real del dato e $\hat{y}_i$ la clase predecida por el modelo.
 
-Tras realizar diversos experimentos que comentaré más adelante en la selección de hiperparámetros, usando la métrica de mínimos cuadrados en gradiente descendente estocástico obtenemos muy malos resultados, por este motivo usaré también la métrica Hinge\cite{hingeLoss}.
+Tras realizar diversos experimentos que comentaré más adelante en la selección de hiperparámetros, usando la métrica de mínimos cuadrados en gradiente descendente estocástico obtenemos muy malos resultados, por este motivo usaré también la métrica Hinge\cite{hingeLoss} para este modelo.
 
 Esta métrica consiste en obtener un Support Vector Machine lineal, que nos definirá la función de perdida y el vector de pesos se verá modificado acorde a dicho SVM.
 
@@ -339,7 +341,7 @@ En este problema utilizaremos la norma L2 ya que es la más similar a la métric
 
 En esta sección comentaré los modelos lineales a usar para intentar resolver el problema.
 
-Usaré Regresión Lineal con regularización, Regresión Logística y Gradiente Descendente Estocástico. Usaré la implementación dada en Scikit-Learn\cite{scikitlearnlinearmodels}, y comentaré como funcionan, aunque son los algoritmos vistos en prácticas anteriores por los que ya los conocemos.
+Usaré Regresión Lineal con regularización (Ridge Regression), Regresión Logística y Gradiente Descendente Estocástico. Usaré la implementación dada en Scikit-Learn\cite{scikitlearnlinearmodels}, y comentaré como funcionan, aunque son los algoritmos vistos en prácticas anteriores por los que ya los conocemos.
 
 He decidido no usar el modelo Perceptron ya que, como he comentado, los datos pueden contener ruido y no ser linealmente separables, aun así podría haber usado el modelo PLA-Pocket, sin embargo considero que estudiando el comportamiento en los cuatro modelos mencionados no es necesario añadir este, así como tampoco usar Regresión Lineal, ya que la he sustituido por la versión con regularización al poder adaptar la regularización a través de sus hiperparámetros, y en caso de no querer regularizar simplemente el parámetro del peso de la regularización será 0.
 
@@ -705,41 +707,491 @@ Aun así, hemos obtenido muy buenos resultados para ser un problema con gran nú
 \newpage
 
 \section{Problema de regresión.}
-
 \subsection{Comprender el problema. Identificar X, Y y F en el problema.}
 
+Para este problema tenemos datos distintas comunidades de Estados Unidos donde nos dan información sobre la población y como meta el número de crímenes violentos por población. Este conjunto cuenta con 1994 instancias y cada instancia con 128 atributos, aunque nos avisan de que algunos de estos no son predictivos. Estos datos se han obtenido de la base de datos \textit{Machine Learning Repository}, en concreto usaremos el conjunto de datos \textit{Communities and Crime Data Set} \cite{mlr_crimen}.
+
+
+De entre las variables predictoras podemos encontrar la población de cada comunicadad, los ingresos según raza, coste medio de vivir en dicha zona, porcentaje de policías según la raza, porcentaje de población inmigrante, entre muchos otros factores. Discutiré los datos con más profundidad en los siguientes apartados.
+
+
+Con respecto al problema, debemos ser conscientes de que con gran seguridad contarán con ruido debido a que incluso con la gran cantidad de variables proporcionadas algún factor puede quedar fuera, y como veremos esto es así ya que este conjunto de datos cuenta con valores perdidos, además de que aunque exista un patrón entre los datos y el porcentaje de crímenes violentos no tiene porque cumplirse siempre. Esto se confirma ya que según el estado del país, algunos crímenes son contados como violentos o no, como nos informa el data set en su descripción.
 
 \subsubsection{X del problema.}
 
+El conjunto X del problema son los datos de entrada con los que entrenaremos el modelo. 
+
+Como leemos del fichero de información de descripción disponible en la base de datos\cite{mlr_crimen}, cada dato cuenta con 128 variables cuyo valor está en el rango [0,1] ya que como nos dicen, están normalizadas. Cada variable representa distintos datos de interés sobre la comunidad.
+
+Aunque cada dato cuenta con 128 atributos, en el data set nos avisan de que los 5 primeros atributos no son predictivos, luego al leerlos no los tendremos en cuenta. El resto de atributos son valores numéricos decimales.
+
+Algunos de estos atributos son la población, porcentaje de población según raza, porcentaje de policías, porcentaje de raza de los policías, entre muchas otras.
+
+También hay que tener en cuenta que en algunos lugares del país estos datos no están disponibles, luego tendremos valores perdidos, que gestionaremos en la sección de preprocesado de datos.
 
 \subsubsection{Y del problema.}
 
+Las etiquetas del problema representan el número de crímenes violentos por cada 100.000 habitantes. Nuestro objetivo es obtener un modelo que prediga este dato a partir de los atributos de X.
+
 \subsubsection{F del problema.}
+
+La función $f$ del problema es la función desconocida que estima de forma perfecta el número de crímenes violentos por cada 100.000 habitantes. El objetivo de esta práctica es obtener una función $g$ perteneciente al conjunto de clases de funciones a usar (del que hablaré más adelante) que sea lo más parecida posible a la función $f$.
+
+Este problema lo podemos tratar como un problema de aprendizaje ya que los datos cuentan con un patrón (si con cierta entrada de atributos le corresponde un número de crímenes violentos es muy probable que las entradas similares tengan el mismo valor debido a factores sociales), la función $f$ es desconocida y no es calculable, ya que si lo fuera no necesitamos utilizar técnicas de aprendizaje, simplemente aplicamos la función y hemos resuelto el problema, y por último, tenemos datos con los que entrenar nuestro modelo.
 
 \subsection{Clases de funciones a usar.}
 
+Para este problema utilizaré combinaciones lineales de los datos. Dado que las características de los datos de entrada son en la mayoría porcentajes, sumado a que todos los valores están ya normalizados en el rango [0,1] luego no tendría sentido aplicar funciones complejas ya que no tendría sentido hacer el cuadrado de un porcentaje, por ejemplo.
+
+Otra razón es que el problema es de gran dimensionalidad, si usamos clases de funciones más complejas podría presentar problemas de overfitting o una necesidad mayor de tiempo de entrenamiento.
+
 \subsection{Conjuntos de training y test.}
+
+En este problema, a diferencia del problema de clasificación, no se nos proporciona un conjunto de training y test, solo se proporciona un fichero de datos, luego será necesario que separemos este conjunto en training y test. 
+
+Otro problema que tiene es que el conjunto de datos tiene valores perdidos que gestionaremos en el preprocesado, luego para no tener que aplicar el preprocesado dos veces, aplicaré el preprocesado a todos los datos leidos y luego separaré en training y test.
+
+Para leer los ficheros, al tener el formato de fichero CSV (aunque la extensión no sea CSV), he utilizado la biblioteca pandas, en concreto el método \texttt{read\_csv}\cite{pandasReadCSV} y en este problema usaremos el parámetro \texttt{na\_values}, al que le pasaremos el caracter '?' y así al leer los datos, sustituirá los valores perdidos que vienen dados por una interrogación en los datos por el valor nan (Not A Number).
+
+Al leer los ficheros, el conjunto de datos X serán las distintas filas con todas las columnas a excepción de la última y el conjunto de etiquetas serán la última columna de todas las filas.
+
+
+Una vez hemos leído los datos y las etiquetas al completo utilizaré la función \texttt{train\_test\_split} de Scikit-Learn para separar ambos conjuntos en training y test. Utilizaré la regla práctica comentada tanto en teoría\cite{teoria} como en la bibliografía\cite{libro} del 80\% y 20\%, es decir, el conjunto de datos será dividido en un 80\% de training y 20\% de test.
+
+\subsubsection{Conjunto de training}
+
+Tras leer los datos, aplicar el preprocesado y separar en training y test, obtenemos un conjunto de training con la siguiente información:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{regresion/num_datos.png}
+	\caption{Información sobre el número de datos en training.}
+	\label{datosReg}
+\end{figure}
+
+Vemos como de los 1994 datos dados, el 80\% (1595 datos) conforman el conjunto de training. Otro detalle que podemos observar es que en principio según el dataset tenemos 128 atributos, restando los 5 no predictivos nos quedan 123 atributos, sin embargo vemos como al leerlos tenemos 100, el motivo es el preprocesado de datos, como comentaré más adelante, algunos atributos tenían demasiados valores perdidos y he decidido eliminarlos.
+
+\subsubsection{Conjunto de validación}
+
+Usaremos el mismo método que para el ejercicio de clasificación. A partir del conjunto de entrenamiento obtendré un conjunto para realizar la validación del modelo. Usaré cross-validation a través de las herramientas que ofrece Scitik-Learn para realizar la validación cruzada\cite{crossval}, aunque comentaré en la sección de hiperparámetros el número de particiones de validación. 
+
+Este método consiste en dividir los datos de entrenamiento, de forma que tengamos un conjunto de entrenamiento más pequeño y $k$ conjuntos de validación ($k$ es un entero que discutiré en la sección de hiperparámetros), de forma que se entrenará $k$  veces y se validará con las $k$ particiones de validación, y finalmente nos quedaremos con la media de estas, para asegurar tener un buen ajuste.
+
+\subsubsection{Conjunto de test}
+
+En este caso el conjunto de test, tras aplicar la separación conforma el 20\% de los datos dados:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.6]{regresion/num_datos_test.png}
+	\caption{Información sobre el número de datos  en test.}
+	\label{datosRegTest}
+\end{figure}
+
+
+\newpage
 
 \subsection{Preprocesado de los datos.}
 
+Para este problema si será necesario un proprocesado de los datos.
+
+Para empezar, directamente al leer los datos eliminamos los cinco primeros atributos al no ser predictivos.
+
+La descripción del dataset usado nos avisa de que los valores ya han sido normalizados para que estén en el rango [0,1] con dos decimales usando un método de aprendizaje no supervisado para agrupación en intervalos (aunque no nos comentan cual).
+
+Con respecto a la alta dimensionalidad, en principio no la modificaremos debido a que la gran variedad de atributos dada nos dará un mejor ajuste, solo la modificaré si el ajuste es muy malo.
+
+La principal cuestión que comentaré es la gestión de valores perdidos. Al principio no tenía claro como gestionarlo, pero finalmente, con la aparición de los criterios a usar por el proyecto final de la asignatura, he decidido usar estos mismos criterios un poco simplificados.
+
+Cuando encontramos valores perdidos en un atributo existen dos posibilidades:
+
+\begin{enumerate}
+	\item El atributo está perdido en más de cierto porcentaje en los datos: Este atributo es eliminado, la estimación de estos datos no sería realista al estar estimandola para la mayoría de datos.
+	\item El atributo está perdido en menos del mismo porcentaje de datos: Los valores perdidos de ese atributo se sustituyen por la media del atributo.
+\end{enumerate}
+
+El porcentaje que usaré será de un 20\%, ya que es el usado para el proyecto final.
+
+De esta forma nos encontramos con la siguiente lectura y preprocesado de datos:
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-0.5cm}\includegraphics[scale=0.4]{regresion/preprocesado.png}
+	\caption{Preprocesado de los datos en el problema de regresión.}
+	\label{prepro}
+\end{figure}
+
+
+Observamos como el atributo 25 (atributos finales, sin contar los no predictivos) tiene un único valor perdido, luego este es sustituido por la media, mientras que otros atributos como el 96, 97 y demás que están en la salida del script pero no aquí ya que no he considerado necesario mostrarlos en la memoria, la gran cantidad de valores perdidos hace que dichos atributos sean eliminados.
+
+Esto lo hemos podido hacer ya que al leer los datos con pandas, he sustituido los valores perdidos por nan, y para preprocesarlo simplemente he recorrido la matriz por columnas, haciendo la media de cada columna y contando el número de valores nan\cite{npIsNaN}, si el contador es más que el porcentaje dado de datos, se guarda en una lista para eliminar dichas columnas al final con la función delete de NumPy\cite{npDelete}, y en caso de ser menor, los valores nan se sustituyen por la media calculada.
+
+Finalmente, al eliminar los atributos con muchos valores perdidos obtenemos que finalmente trabajaremos con 100 atributos.
+
 \subsection{Fijar la métrica. Idoneidad sobre el problema.}
 
-\subsubsection{Métrica de ajuste.}
+En este apartado fijaremos la métrica que usaremos para la evaluación, es decir, la métrica que utilizaremos para calcular el error del modelo una vez esté entrenado, es decir, saber como bien se comporta. Esto no quiere decir que la métrica que usará el modelo para entrenarse sea obligatoriamente esta, aunque en este problema si que lo será.
 
-\subsubsection{Métrica de evaluación.}
+
+Debido a que estamos en un problema de regresión la métrica de evaluación será el error cuadrático medio, es decir, que a mayor distancia de los datos con nuestro ajuste, mayor será el error.
+
+He escogido esta métrica ya que es simple, como hemos visto en teoría, prácticas y la bibliografía es muy usada y como hemos comprobado en otras prácticas y veremos más adelante se comporta de forma adecuada, al estar ante un problema de regresión intentando estimar valores numéricos decimales.
+
 
 \subsection{Técnica de ajuste elegida.}
 
+Al igual que en el problema de clasificación, para realizar el ajuste usaremos la métrica Mean Squared Error, ya que los modelos lineales que he seleccionado y veremos más adelante se basan en regresión, luego no podemos usar la métrica para la evaluación escogida. 
+
+Usaremos esta métrica de ajuste ya que es bastante conocida para nosotros y la hemos utilizado en otras prácticas de clasificación en las que hemos usado modelos lineales basados en regresión, además de comportarse bien en nuestro problema como veremos más adelante.
+
+
+$$ \frac{1}{N} \sum_{i=1}^{N}{(y_i - \hat{y}_i)^2} $$
+
+Siendo $y_i$ la clase real del dato e $\hat{y}_i$ la clase predecida por el modelo.
+
+
 \subsection{Necesidad de regularización.}
+
+La regularización es necesaria para evitar el overfitting al entrenar el modelo. La idea de utilizar regularización es minimizar el cambio en la función de error, para obligar a que no se ajuste de forma perfecta a los datos. Esta técnica nos será útil especialmente cuando los datos contienen ruido, como es nuestro caso.
+
+Debido a la alta dimensionalidad de los datos es posible que se genere overfitting, aunque no lo sabemos a priori, por este motivo en los modelos a usar que explicaré más adelante probaré a utilizar los distintos modelos con y sin regularización.
+
+En principio si es necesaria esta regularización, sin embargo voy a realizar distintos experimentos para comprobar su importancia.
+
+Para aplicar la regularización existen dos normas\cite{l1l2regularizacion}.
+
+
+\subsubsection{Norma L1: }
+
+La norma L1, llamada Regresión Lasso, consiste en añadir el valor absoluto de la magnitud multiplicado por el coeficiente de penalización:
+
+$$ \lambda \sum_{j=1}^{p}{|\beta_j|} $$
+
+\subsubsection{Norma L2:}
+
+La norma L2, también llamada Ridge Regression, se basa en añadir el cuadrado de la magnitud por el coeficiente de penalización en la función de coste:
+
+$$ \lambda \sum_{j=1}^{p}{\beta_j^2} $$
+
+
+En este problema utilizaremos la norma L2 ya que es la más similar a la métrica de ajuste usada. En caso de que al realizar pruebas y comprobar que la norma L1 se comporta mejor, modificaré esta sección explicando el cambio (si se llega a producir).
+
+\newpage
 
 \subsection{Modelos a usar.}
 
+En esta sección comentaré los modelos lineales a usar para intentar resolver el problema.
+
+Usaré Regresión Lineal, Regresión Ridge y Gradiente Descendente Estocástico. Usaré la implementación dada en Scikit-Learn\cite{scikitlearnlinearmodels}, y comentaré como funcionan, aunque son los algoritmos vistos en prácticas anteriores por los que ya los conocemos.
+
+He decidido no usar el modelo Perceptron ya que, como he comentado, los datos pueden contener ruido y no ser linealmente separables, aun así podría haber usado el modelo PLA-Pocket, sin embargo considero que estudiando el comportamiento en los modelos mencionados no es necesario añadir este.
+
+
+\subsubsection{Regresión Lineal.}
+
+En este caso este modelo es el visto en otras prácticas y en teoría. Como vemos en el código del algoritmo\cite{sourceLinReg} y hemos visto en la asignatura, este algoritmo es un algoritmo simple y sencillo, por lo que no tiene muchos parámetros con los que podamos intentar ajustar mejor el modelo.
+
+
+\subsubsection{Regresión Ridge.}
+
+Este modelo es una variación de la Regresión Lineal pero teniendo en cuenta la regularización. En concreto usa la norma L2. Como podemos ver en su código fuente\cite{sourceRidgeReg}, se trata del modelo anterior teniendo en cuenta dicha norma.
+
+
+\subsubsection{Gradiente Descendente Estocástico.}
+
+De nuevo, este modelo es el visto en la asignatura, sin embargo Scikit-Learn cuenta con dos variantes, una para clasificación y otra para regresión. En este problema, al tratarse de regresión, usaremos dicha variante\cite{sourceSGDReg}.
+
+
+\newpage
+
 \subsection{Hiperparámetros y selección del mejor modelo.}
+
+En esta sección discutiré los hiperparámetros de cada algoritmo, así como cuales considero los mejores para cada uno, y finalmente el modelo que mejor se comportan en nuestro problema.
+
+Para realizar las ejecuciones, como he comentado, usaré Scikit-Learn. Para realizar una ejecución tiene distintos pasos:
+
+\begin{enumerate}
+	\item Declaración del modelo a utilizar. Debemos crear una variable que tendrá un objeto de la clase del modelo a utilizar, en la creación de este objeto será cuando especificaremos los hiperparámetros del modelo.
+	\item Ajustar el modelo haciendo uso del método fit de la clase de dicho modelo. Se encargará de estimar el modelo.
+	\item Calcular el error dentro de la muestra usando validación cruzada. Esto lo haremos haciendo uso del método \texttt{cross\_val\_score}.
+	\item Predecir las etiquetas del conjunto de test.
+	\item Calcular el error en el conjunto de test.
+\end{enumerate}
+
+Un ejemplo sería:
+
+\begin{lstlisting}
+estimador = ClaseEstimador(hiperparametros)
+print("\tAjustando el modelo")
+estimador.fit(x,y)
+# aplicamos validación cruzada una vez tenemos el modelo ajustado
+print("\tAplicando", cv, "-k-folds cross-validation")
+# usamos de metrica la tasa de aciertos (accuracy)
+resultado_cross_val = cross_val_score(estimador, x, y, scoring='accuracy', cv=cv)
+fin = time.time()
+print("\tTiempo (en segundos) necesario para ajustar el modelo y aplicar cross-validation: ", fin-inicio)
+print("\n")
+print("\tEvaluación media de aciertos usando cross-validation: ", resultado_cross_val.mean())
+print("\tE_in usando cross-validation: ", 1-resultado_cross_val.mean())
+
+print("\tPrediciendo las etiquetas en test")
+# predecimos test acorde al modelo
+y_predecida_test = clasificador.predict(x_test).round()
+# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
+print("\tObteniendo E_test a partir de la predicción")
+aciertos = accuracy_score(y_test, y_predecida_test)
+print("\tPorcentaje de aciertos en test: ", aciertos)
+print("\tE_test: ", 1-aciertos)
+\end{lstlisting}
+
+Ya que la única diferencia entre usar un modelo u otro es la primera linea, y además fijamos los hiperparámetros, lo he separado en una función donde le pasamos el estimador:
+
+\begin{lstlisting}
+estimador = ClaseEstimador(hiperparametros)
+evaluar(estimador, x, y, x_test, x_test, num_kfolds)
+\end{lstlisting}
+
+
+\subsubsection{Regresión Lineal}
+
+
+\subsubsection{Regresión Ridge.}
+
+En este modelo, aunque ofrece gran cantidad de parámetros para controlar su funcionamiento, nos vamos a centrar en tres:
+
+\begin{enumerate}
+	\item alpha: Factor por el que se multiplica el método de regularización, en este caso la norma L2 aplicada por defecto. Este parámetro por defecto tiene valor 1.
+	\item max\_iter: Máximo número de iteraciones del algoritmo. Por defecto no tiene límite de iteraciones.
+	\item tol: Precisión de la solución. Por defecto $1^{-3}$.
+\end{enumerate}
+
+
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{ridge}.
+
+
+Para este modelo no modificaré la precisión de la solución ya que es bastante baja ni el máximo de iteraciones ya que no consume un tiempo considerable.
+
+El factor que si modificaré será el factor que multiplica al método de regularización. He realizado pruebas con valores 0 (sin regularización), 0.1, 1 (valor por defecto) y 2, obteniendo estos resultados:
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/ridge0.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier sin regularización.}
+	\label{ridge0}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/ridge01.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 0.1.}
+	\label{ridge01}
+\end{figure}
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/ridge1.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 1.}
+	\label{ridge1}
+\end{figure}
+
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/ridge2.png}
+	\caption{Resultado usando el algoritmo Ridge Classifier con factor de regularización 2.}
+	\label{ridge2}
+\end{figure}
+
+
+En principio, viendo los resultados, vemos como este algoritmo se comporta muy bien, dando una tasa de error muy baja.
+
+En este algoritmo podemos ver como el uso de regularización es notable, y es que en el modelo en el que no se aplicaba regularización, aunque el error dentro de la muestra es menor, el error en el conjunto de test es mayor que en los ajustes en los que se ha aplicado regularización, lo que nos da señales de overfitting, aunque es muy leve y aun sin regularización obtenemos buenos resultados.
+
+
+\newpage
+
+\subsubsection{Gradiente Descendente Estocástico.}
+
+En Gradiente Descendente Estocástico tenemos los siguientes parámetros cruciales:
+
+\begin{enumerate}
+	\item loss: Función de perdida. Por defecto 'hinge'.
+	\item penalty: Termino de regularización. Por defecto la norma L2.
+	\item alpha: Constante multiplicadora de la regularización. Por defecto 0.0001. Con un mayor valor, mayor será la regularización.
+	\item learning\_rate: Esquema para la tasa aprendizaje. Por defecto optimo, siguiendo la siguiente formula $eta = \frac{1}{alpha \cdot (t + t_0)}$ donde $t_0$ es una heurística propuesta por Leon Bottou. Como podemos ver, si el esquema es el esquema óptimo el parámetro alpha debe ser distinto a 0.
+	\item eta0: Valor de la tasa de aprendizaje en caso de utilizar un esquema constante. No es usado en el esquema óptimo.
+	\item max\_iter: Máximo de iteraciones del algoritmo.
+\end{enumerate}
+
+Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{sgdclasificacion}.
+
+Para la función de perdida usaremos square\_loss, sin embargo, como comentamos y veremos ahora, esta función de perdida se comporta muy mal, luego también ejecutaremos el algoritmo con la función de perdida Hinge.
+
+Para el termino de regularización, como hemos hecho con todos los modelos, usaremos la norma L2.
+
+El parámetro alpha discutiremos más adelante cual será el mejor valor, y realizaré pruebas con valores 0, 0.0001, 0.01, 0.1 y 1.
+
+Para el esquema de la tasa de aprendizaje realizaremos las pruebas con dos esquemas, el constante y el óptimo. Las pruebas con alpha con valor 0 solo las haré con el esquema constante ya que con el óptimo es necesario para calcular el valor de la tasa de aprendizaje.
+
+Como nota añadir que haciendo el experimento con la función de perdida square\_loss obtenemos malos resultados siempre y voy a desechar ese modelo por sus malos resultados, así que la comparación entre el esquema constante y el óptimo será con la función de perdida Hinge.
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss0001.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.001 y función de perdida square loss.}
+	\label{SGDL0001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss001.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.01 y función de perdida square loss.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss01.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.1 y función de perdida square loss.}
+	\label{SGDL01}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss1.png}
+	\caption{Resultado usando el algoritmo SGD con factor de regularización 1 y función de perdida square loss.}
+	\label{SGDL1}
+\end{figure}
+
+\newpage
+
+Vemos como este modelo, aun variando el factor de regularización, obtenemos ajustes muy malos. A continuación probamos con la función de perdida Hinge:
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001a0.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante 0.01, sin regularización y función de perdida Hinge.}
+	\label{SGDL0}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH00001.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida Hinge.}
+	\label{SGDL00001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH00001c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida Hinge.}
+	\label{SGDL00001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH01.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH01c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH1.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH1c.png}
+	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida Hinge.}
+	\label{SGDL001}
+\end{figure}
+
+
+Vemos como en todos los casos con un esquema de tasa de aprendizaje óptimo obtenemos muy buenos resultados que se parecen mucho, los cuales ahora comentaremos.
+
+Con el esquema constante, vemos como el factor de regularización si influye en gran medida, ya que como vemos, con un factor 1 existe demasiada regularización y por lo tanto no llega a ajustar de forma correcta el modelo, dando un error tanto en la muestra como en test bastante alto (del 40\% y 55\% respectivamente), mientras que sin regularizar obtenemos un 8'6\% de error en test, y con la regularización por defecto obtenemos un mejor valor, 5'2\% de error en test, aunque en el primero obtengamos mejor valor del error dentro de la muestra, por lo que podemos ver que la regularización sigue siendo necesaria y evita overfitting en el entrenamiento.
+
+
+\subsubsection{Mejor modelo.}
+
+Escogeré el mejor modelo según el modelo con mejor error en el conjunto de test ya que es el que mejor ha estimado unos datos con los que no ha entrenado. Por este motivo el modelo escogido será Regresión Logística con un factor de regularización $C=1$, por lo que la estimación del error se hará con este modelo.
+
+\newpage
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
 
+Como hemos visto tanto en teoría\cite{teoria} como en la bibliografía de la asignatura\cite{libro}, podemos hacer una estimación del error fuera de la muestra al usar validación cruzada.
+
+Si tenemos $N$ conjuntos de validación, sabemos que:
+
+$$E_{cv} = \frac{1}{N}\sum_{n=1}^{N}{E_{val}(g_n^-)}$$
+
+Y como hemos visto acorde a las curvas de aprendizaje vistas en teoría, sabemos que:
+
+$$E_{out}(g) \leq E_{cv}(g) $$
+
+En realidad $E_{cv}$ es la media de todos los errores al usar la función \texttt{cross\_val\_score}, luego esta estimación se ha hecho para todas las pruebas que hemos realizado y en concreto en el modelo escogido obtenemos que:
+
+$$  E_{out}(g) \leq 0'038$$
+
+Vemos como claramente esto no es así, ya que en el mismo modelo el error en el conjunto de test es mayor (0'0512), y esto puede deberse a que el número de $k$-folds es demasiado alto.
+
+
+
+
 \subsection{Modelo propuesto y estimación del error fuera de la muestra de este modelo.}
 
+Podemos hacer una estimación del error fuera de la muestra usando el conjunto de test. En el modelo que hemos escogido vemos como esta estimación se de un error del 5'12\%.
+
+Esto lo podemos comprobar mostrando la matriz de confusión.
+
+Esta matriz hará un recuento de los datos reales y predecidos. En las filas se muestra el valor real de la clase, y el las columnas el valor predecido por nuestro modelo, de forma que si el valor real es un 0 y el modelo ha predecido un 7, sumará uno en la posición 0,7. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{regresion/matrizC.png}
+	\caption{Matriz de confusión con los datos predecidos del modelo seleccionado.}
+	\label{MC}
+\end{figure}
+
+El que en esta matriz se muestre la diagonal con los números mayores quiere decir que la mayor parte del conjunto de test ha realizado una buena predicción, mientras que en las posiciones  fuera de la diagonal ha cometido error. Vemos como principalmente comete errores al clasificar el número 8, que lo suele confundir con un 1 (imagino que al ser ambos bastante similares, ser simétricos y estar por la zona central de la imagen) y con un 9 (al compartir la misma zona de la imagen y solo diferenciarse en un cuadrante de la imagen).
+
+Aun así, hemos obtenido muy buenos resultados para ser un problema con gran número de variables y tener gran cantidad de clases.
 
 \newpage
 
@@ -852,29 +1304,36 @@ Machine Learning Repository: Communities and Crime Data Set
 \url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}
 
 
+\bibitem{linearRed}
+Scikit-Learn: Regresión Lineal
 
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression}
 
 \bibitem{ridge}
 Scikit-Learn: Ridge Regression
 
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html#sklearn.linear_model.Ridge}
 
-\bibitem{sgdclasificacion}
+\bibitem{sgdregresion}
 Scikit-Learn: SGD Regression
 
 \url{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDRegressor.html#sklearn.linear_model.SGDRegressor}
 
 
+\bibitem{sourceLinReg}
+Código fuente Lineal Regression Scikit-Learn:
+
+\url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_base.py#L389}
 
 \bibitem{sourceRidgeReg}
-Código fuente Ridge Classification Scikit-Learn:
+Código fuente Ridge Regressor Scikit-Learn:
 
 \url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_ridge.py#L603}
 
 
 
 \bibitem{sourceSGDReg}
-Código fuente SGD para clasificación Scikit-Learn:
+Código fuente SGD para regresión Scikit-Learn:
 
 \url{https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/linear_model/_stochastic_gradient.py#L1354}
 
