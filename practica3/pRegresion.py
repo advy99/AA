@@ -20,7 +20,7 @@ from sklearn.linear_model import SGDRegressor
 from sklearn.model_selection import cross_val_score
 
 # metricas
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 
@@ -118,7 +118,7 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 	y_predecida_test = clasificador.predict(x_test).round()
 	# miramos la tasa de aciertos, es decir, cuantos ha clasificado bien
 	print("\tObteniendo E_test a partir de la predicción")
-	error = mean_absolute_error(y_test, y_predecida_test)
+	error = mean_squared_error(y_test, y_predecida_test)
 	print("\tE_test: ", error)
 
 
@@ -214,7 +214,9 @@ ridgeCReg2 = Ridge(alpha=2)
 print("Evaluando Ridge Regression con factor de regularización 2:")
 evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
-
+ridgeCReg2 = Ridge(alpha=3)
+print("Evaluando Ridge Regression con factor de regularización 3:")
+evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
 
 
