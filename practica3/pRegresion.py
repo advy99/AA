@@ -214,10 +214,6 @@ ridgeCReg2 = Ridge(alpha=2)
 print("Evaluando Ridge Regression con factor de regularización 2:")
 evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
 
-ridgeCReg2 = Ridge(alpha=3)
-print("Evaluando Ridge Regression con factor de regularización 3:")
-evaluar(ridgeCReg2, x, y, x_test, y_test, kfolds)
-
 
 
 
