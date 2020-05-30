@@ -140,6 +140,8 @@ print("Leidos ", y.size, " datos con sus respectivas etiquetas")
 
 print("Cada dato del conjunto de datos tiene ", x[0].size, " variables.")
 
+print("El conjunto test está compuesto ", y_test.size, " datos con sus respectivas etiquetas")
+
 input("\n--- Pulsar tecla para continuar ---\n")
 
 # print(contador)
