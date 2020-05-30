@@ -264,3 +264,8 @@ evaluar(SGD, x, y, x_test, y_test, kfolds)
 SGD = SGDRegressor(loss='squared_loss', penalty='l2', alpha=1, learning_rate='constant', eta0=0.01, max_iter=5000)
 print("Evaluando SGD Regressor con tasa de aprendizaje constante y factor de regularización 1 y función de perdida squared_loss:")
 evaluar(SGD, x, y, x_test, y_test, kfolds)
+
+
+
+estimacion = cross_val_score(ridgeCReg2, x, y, scoring='neg_mean_squared_error', cv=x.shape[0])
+print("Estimación E_out usando cross-validation (Leave One Out): ", abs(estimacion.mean()))
