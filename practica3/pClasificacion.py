@@ -18,11 +18,13 @@ from sklearn.linear_model import SGDClassifier
 
 # para hacer validación cruzada
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import LeaveOneOut
 
 # metricas
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+
 
 # para contar tiempos
 import time
@@ -252,6 +254,11 @@ print("Evaluando SGD Classifier con tasa de aprendizaje constante y factor de re
 evaluar(SGD, x, y, x_test, y_test, kfolds)
 
 
+unique, contador = np.unique(y, return_counts=True)
+
+
+estimacion = cross_val_score(ridgeCReg, x, y, scoring='accuracy', cv=np.amax(contador))
+print("Estimación E_out usando cross-validation (Leave One Out): ", 1-estimacion.mean())
 
 
 print("Matriz de confusión con y_test y los valores predecidos: ")
