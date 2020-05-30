@@ -670,7 +670,7 @@ Como conclusión también añadir que a pesar de ser necesaria la regularizació
 
 Como hemos visto tanto en teoría\cite{teoria} como en la bibliografía de la asignatura\cite{libro}, podemos hacer una estimación del error fuera de la muestra al usar validación cruzada.
 
-Si tenemos $N$ conjuntos de validación, sabemos que:
+Si tenemos $N$ datos en training, sabemos que:
 
 $$E_{cv} = \frac{1}{N}\sum_{n=1}^{N}{E_{val}(g_n^-)}$$
 
@@ -678,13 +678,24 @@ Y como hemos visto acorde a las curvas de aprendizaje vistas en teoría, sabemos
 
 $$E_{out}(g) \leq E_{cv}(g) $$
 
-En realidad $E_{cv}$ es la media de todos los errores al usar la función \texttt{cross\_val\_score}, luego esta estimación se ha hecho para todas las pruebas que hemos realizado y en concreto en el modelo escogido obtenemos que:
+Para esto usaremos \texttt{cross\_val\_score}\cite{crossval} usando tantos k-folds como datos tiene el conjunto de training para hacer el método Leave One Out, y realizar la estimación, con lo que obtenemos lo siguiente:
 
-$$  E_{out}(g) \leq 0'038$$
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{clasificacion/eout_clas.png}
+	\caption{Estimación de $E_{out}$ usando cross-validation.}
+	\label{eoutclas}
+\end{figure}
 
-Vemos como claramente esto no es así, ya que en el mismo modelo el error en el conjunto de test es mayor (0'0512), y esto puede deberse a que el número de $k$-folds es demasiado alto.
 
+Vemos como en este caso esta estimación está dentro de la cota calculada usando cross-validation ya que el error en el conjunto de test es menor que esta cota:
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.45]{clasificacion/logistic1.png}
+	\caption{Resultado usando el algoritmo Regresión Logística con factor de regularización 1.}
+	\label{LR1}
+\end{figure}
 
 
 \subsection{Modelo propuesto y estimación del error fuera de la muestra de este modelo.}
@@ -988,21 +999,8 @@ El factor que si modificaré será el factor que multiplica al método de regula
 	\label{ridgereg2}
 \end{figure}
 
+Como vemos, aunque es cierto que se obtienen mejores resultados con una regularización más fuerte, apenas hay cambios y el modelo obtiene valores muy buenos, manteniendo un error del 7\% fuera de la muestra.
 
-En principio, viendo los resultados, vemos como este algoritmo se comporta bien, aunque con el mismo problema que Regresión Lineal, tiene una tasa de error muy baja dentro de la muestra pero bastante mayor en el conjunto de test, aún aplicando la regularización.
-
-Debido a que al aplicar una mayor regularización (usando un factor 2) obtenemos mejores resultados en test, he añadido el siguiente experimento con factor 3:
-
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.45]{regresion/ridge3.png}
-	\caption{Resultado usando el algoritmo Ridge Regression con factor de regularización 3.}
-	\label{ridgereg3}
-\end{figure}
-
-
-Vemos como volvemos a tener peor resultado en el error en test, 
 
 \newpage
 
@@ -1021,7 +1019,7 @@ En Gradiente Descendente Estocástico tenemos los siguientes parámetros crucial
 
 Podemos ver todos los parámetros disponibles en la web de Scikit-Learn\cite{sgdclasificacion}.
 
-Para la función de perdida usaremos square\_loss, sin embargo, como comentamos y veremos ahora, esta función de perdida se comporta muy mal, luego también ejecutaremos el algoritmo con la función de perdida Hinge.
+Para la función de perdida usaremos square\_loss como hemos comentado.
 
 Para el termino de regularización, como hemos hecho con todos los modelos, usaremos la norma L2.
 
@@ -1029,125 +1027,85 @@ El parámetro alpha discutiremos más adelante cual será el mejor valor, y real
 
 Para el esquema de la tasa de aprendizaje realizaremos las pruebas con dos esquemas, el constante y el óptimo. Las pruebas con alpha con valor 0 solo las haré con el esquema constante ya que con el óptimo es necesario para calcular el valor de la tasa de aprendizaje.
 
-Como nota añadir que haciendo el experimento con la función de perdida square\_loss obtenemos malos resultados siempre y voy a desechar ese modelo por sus malos resultados, así que la comparación entre el esquema constante y el óptimo será con la función de perdida Hinge.
-
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss0001.png}
-	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.001 y función de perdida square loss.}
-	\label{SGDL0001}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss001.png}
-	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.01 y función de perdida square loss.}
-	\label{SGDL001}
-\end{figure}
-
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss01.png}
-	\caption{Resultado usando el algoritmo SGD con factor de regularización 0.1 y función de perdida square loss.}
-	\label{SGDL01}
-\end{figure}
-
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdLoss1.png}
-	\caption{Resultado usando el algoritmo SGD con factor de regularización 1 y función de perdida square loss.}
-	\label{SGDL1}
-\end{figure}
-
-\newpage
-
-Vemos como este modelo, aun variando el factor de regularización, obtenemos ajustes muy malos. A continuación probamos con la función de perdida Hinge:
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001a0.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante 0.01, sin regularización y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd001a0.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje constante 0.01 , sin regularización y función de perdida square\_loss.}
 	\label{SGDL0}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH00001.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd00001.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.0001 y función de perdida square\_loss.}
 	\label{SGDL00001}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH00001c.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd00001c.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.0001 y función de perdida square\_loss.}
 	\label{SGDL00001}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd001.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.01 y función de perdida square\_loss.}
 	\label{SGDL001}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH001c.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida Hinge.}
-	\label{SGDL001}
-\end{figure}
-
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH01.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida Hinge.}
-	\label{SGDL001}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH01c.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd001c.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.01 y función de perdida square\_loss.}
 	\label{SGDL001}
 \end{figure}
 
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH1.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd01.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 0.1 y función de perdida square\_loss.}
 	\label{SGDL001}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgdH1c.png}
-	\caption{Resultado usando el algoritmo SGD Classifier con tasa de aprendizaje constante y factor de regularización 1 y función de perdida Hinge.}
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd01c.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje constante y factor de regularización 0.1 y función de perdida square\_loss.}
 	\label{SGDL001}
 \end{figure}
 
 
-Vemos como en todos los casos con un esquema de tasa de aprendizaje óptimo obtenemos muy buenos resultados que se parecen mucho, los cuales ahora comentaremos.
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd1.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje optima (variable) y factor de regularización 1 y función de perdida square\_loss.}
+	\label{SGDL001}
+\end{figure}
 
-Con el esquema constante, vemos como el factor de regularización si influye en gran medida, ya que como vemos, con un factor 1 existe demasiada regularización y por lo tanto no llega a ajustar de forma correcta el modelo, dando un error tanto en la muestra como en test bastante alto (del 40\% y 55\% respectivamente), mientras que sin regularizar obtenemos un 8'6\% de error en test, y con la regularización por defecto obtenemos un mejor valor, 5'2\% de error en test, aunque en el primero obtengamos mejor valor del error dentro de la muestra, por lo que podemos ver que la regularización sigue siendo necesaria y evita overfitting en el entrenamiento.
+\begin{figure}[H]
+	\centering
+	\hspace*{-1cm}\includegraphics[scale=0.4]{regresion/sgd1c.png}
+	\caption{Resultado usando el algoritmo SGD Regressor con tasa de aprendizaje constante y factor de regularización 1 y función de perdida square\_loss.}
+	\label{SGDL001}
+\end{figure}
+
+
+Para este problema vemos como el factor de regularización de 1 es demasiado alto para este algoritmo y obtenemos peores valores del error tanto en training como en test debido al infraajuste.
 
 
 \subsubsection{Mejor modelo.}
 
-Escogeré el mejor modelo según el modelo con mejor error en el conjunto de test ya que es el que mejor ha estimado unos datos con los que no ha entrenado. Por este motivo el modelo escogido será Regresión Logística con un factor de regularización $C=1$, por lo que la estimación del error se hará con este modelo.
-
-\newpage
+Escogeré el mejor modelo según el modelo con mejor error en el conjunto de test ya que es el que mejor ha estimado unos datos con los que no ha entrenado. Por este motivo el modelo escogido será Regresión Ridge con un factor de regularización 2, por lo que la estimación del error se hará con este modelo.
 
 \subsection{Estimación del error fuera de la muestra usando validación cruzada y comparación con el error en test.}
 
 Como hemos visto tanto en teoría\cite{teoria} como en la bibliografía de la asignatura\cite{libro}, podemos hacer una estimación del error fuera de la muestra al usar validación cruzada.
 
-Si tenemos $N$ conjuntos de validación, sabemos que:
+Si tenemos $N$ datos, sabemos que:
 
 $$E_{cv} = \frac{1}{N}\sum_{n=1}^{N}{E_{val}(g_n^-)}$$
 
@@ -1155,33 +1113,25 @@ Y como hemos visto acorde a las curvas de aprendizaje vistas en teoría, sabemos
 
 $$E_{out}(g) \leq E_{cv}(g) $$
 
-En realidad $E_{cv}$ es la media de todos los errores al usar la función \texttt{cross\_val\_score}, luego esta estimación se ha hecho para todas las pruebas que hemos realizado y en concreto en el modelo escogido obtenemos que:
+Para esto usaremos \texttt{cross\_val\_score}\cite{crossval} usando tantos k-folds como datos tiene el conjunto de training para hacer el método Leave One Out, y realizar la estimación, con lo que obtenemos lo siguiente:
 
-$$  E_{out}(g) \leq 0'038$$
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.4]{regresion/eout_reg.png}
+	\caption{Estimación de $E_{out}$ usando cross-validation.}
+	\label{eoutreg}
+\end{figure}
 
-Vemos como claramente esto no es así, ya que en el mismo modelo el error en el conjunto de test es mayor (0'0512), y esto puede deberse a que el número de $k$-folds es demasiado alto.
-
-
+Vemos como esta estimación, comparándola con $E_{test}$ no se ajusta a la realidad, seguramente por la gran dimensionalidad del problema, este ajuste es erróneo y no se acerca a la realidad.
 
 
 \subsection{Modelo propuesto y estimación del error fuera de la muestra de este modelo.}
 
-Podemos hacer una estimación del error fuera de la muestra usando el conjunto de test. En el modelo que hemos escogido vemos como esta estimación se de un error del 5'12\%.
+El modelo prepuesto será el modelo con mejor $E_{test}$, es decir, Regresión Ridge con un factor de regularización de 2.
 
-Esto lo podemos comprobar mostrando la matriz de confusión.
+Podemos hacer una estimación del error fuera de la muestra usando el conjunto de test. En el modelo que hemos escogido vemos como esta estimación se de un error del 7\%.
 
-Esta matriz hará un recuento de los datos reales y predecidos. En las filas se muestra el valor real de la clase, y el las columnas el valor predecido por nuestro modelo, de forma que si el valor real es un 0 y el modelo ha predecido un 7, sumará uno en la posición 0,7. 
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.45]{regresion/matrizC.png}
-	\caption{Matriz de confusión con los datos predecidos del modelo seleccionado.}
-	\label{MC}
-\end{figure}
-
-El que en esta matriz se muestre la diagonal con los números mayores quiere decir que la mayor parte del conjunto de test ha realizado una buena predicción, mientras que en las posiciones  fuera de la diagonal ha cometido error. Vemos como principalmente comete errores al clasificar el número 8, que lo suele confundir con un 1 (imagino que al ser ambos bastante similares, ser simétricos y estar por la zona central de la imagen) y con un 9 (al compartir la misma zona de la imagen y solo diferenciarse en un cuadrante de la imagen).
-
-Aun así, hemos obtenido muy buenos resultados para ser un problema con gran número de variables y tener gran cantidad de clases.
+Aun así, hemos obtenido muy buenos resultados para ser un problema con gran número de variables, pero si estas variables son necesarias y realmente aportan información han conseguido un mejor ajuste.
 
 \newpage
 
