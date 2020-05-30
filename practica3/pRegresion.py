@@ -37,9 +37,12 @@ np.random.seed(1)
 def preprocesar(x, porcentaje_perdidos_aceptado):
 
 	a_eliminar = []
+	# recorremos todas las columnas
 	for i in range(0, x[0].size):
 		contador = 0
 		valor_medio = 0
+		# contamos los NaN en todas las filas de la columna
+		# (si no es NaN aprovechamos y sacamos el valor medio)
 		for val in x[:, i]:
 			# https://numpy.org/doc/stable/reference/generated/numpy.isnan.html
 			if np.isnan(val):
@@ -49,18 +52,22 @@ def preprocesar(x, porcentaje_perdidos_aceptado):
 
 		valor_medio = valor_medio/x[:, 0].size
 
-
+		# si tenemos valores perdidos, mostramos un aviso
 		if contador != 0:
 			print(contador, " datos tienen el atributo ", i, " perdido " )
 
+		# si la cantidad de valores perdidos es mayor que el porcentaje dado
 		if contador > (x[:, 0].size * porcentaje_perdidos_aceptado):
-			print("El atributo ", i, " tiene más de un ", porcentaje_perdidos_aceptado*100, " por ciento de datos perdidos, luego lo eliminamos")
+			# eliminamos la columna entera
+			print("El atributo ", i, " tiene más de un ", porcentaje_perdidos_aceptado*100, " por ciento de datos perdidos, luego lo eliminamos\n")
 			a_eliminar.append(i)
 		elif contador != 0:
-			print("El atributo ", i, " no esta perdido en más de un ", porcentaje_perdidos_aceptado*100, " por ciento. Los valores perdidos se sustituirán por la suma del valor medio.")
+			# si no, sustituimos los valores perdidos por la media.
+			print("El atributo ", i, " no esta perdido en más de un ", porcentaje_perdidos_aceptado*100, " por ciento. Los valores perdidos se sustituirán por la suma del valor medio.\n")
 			for j in range(0, x[:, i].size):
 				if np.isnan(x[:, i][j]):
 					x[:, i][j] = valor_medio
+
 
 
 	x = np.delete(x, a_eliminar, 1)
@@ -127,7 +134,7 @@ def evaluar(clasificador, x, y, x_test, y_test, cv):
 
 datos = "datos/communities.data"
 
-print("Leyendo datos de", datos )
+print("Leyendo datos de", datos, " y aplicando el preprocesado" )
 x, x_test, y, y_test = leer_datos(datos, 0.2)
 print("Leidos ", y.size, " datos con sus respectivas etiquetas")
 
